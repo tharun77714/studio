@@ -8,7 +8,8 @@ Since this is a Node.js/TypeScript project, it uses a `package.json` file instea
 
 To download all default dependencies, open your terminal in this directory and execute:
 ```bash
-npm install
+npm install or npm install --legacy-peer-deps
+
 ```
 
 Once the installation finishes, you can start your local development server by executing:
