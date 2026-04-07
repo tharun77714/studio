@@ -1,0 +1,209 @@
+"use client";
+
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import { useToast } from '@/hooks/use-toast';
+import type { ConversationView, Message } from '@/types/chat';
+import type { Profile } from './AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  getMessagesForConversationAction,
+  getOrCreateConversationAction,
+  listUserConversationsAction,
+  markMessagesAsReadAction,
+  sendMessageAction,
+} from '@/lib/actions/chat-actions';
+
+interface ChatContextType {
+  isChatOpen: boolean;
+  isChatMaximized: boolean;
+  toggleChat: () => void;
+  closeChat: () => void;
+  toggleMaximizeChat: () => void;
+  openChatWithUser: (targetUserId: string) => Promise<void>;
+  activeConversationId: string | null;
+  setActiveConversationId: (conversationId: string | null) => void;
+  conversations: ConversationView[];
+  messages: Message[];
+  isLoadingConversations: boolean;
+  isLoadingMessages: boolean;
+  sendMessage: (content: string, type?: 'text' | 'image') => Promise<void>;
+  fetchConversations: () => Promise<void>;
+  activeConversationTargetProfile: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email'> | null;
+}
+
+const ChatContext = createContext<ChatContextType | undefined>(undefined);
+
+export function ChatProvider({ children }: { children: ReactNode }) {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatMaximized, setIsChatMaximized] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [activeConversationTargetProfile, setActiveConversationTargetProfile] = useState<
+    Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email'> | null
+  >(null);
+  const [conversations, setConversations] = useState<ConversationView[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
+  const fetchConversations = useCallback(async () => {
+    if (!user) return;
+    setIsLoadingConversations(true);
+    const result = await listUserConversationsAction();
+    if (result.error) {
+      toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
+    } else if (result.data) {
+      setConversations(result.data);
+    }
+    setIsLoadingConversations(false);
+  }, [toast, user]);
+
+  const fetchMessages = useCallback(
+    async (conversationId: string) => {
+      if (!user) return;
+      setIsLoadingMessages(true);
+      const result = await getMessagesForConversationAction(conversationId);
+      if (result.error) {
+        toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
+      } else if (result.data) {
+        setMessages(result.data);
+      }
+      await markMessagesAsReadAction(conversationId);
+      setIsLoadingMessages(false);
+    },
+    [toast, user]
+  );
+
+  useEffect(() => {
+    if (!isChatOpen || !user) {
+      return;
+    }
+    fetchConversations();
+  }, [fetchConversations, isChatOpen, user]);
+
+  useEffect(() => {
+    if (!activeConversationId) {
+      setMessages([]);
+      setActiveConversationTargetProfile(null);
+      return;
+    }
+    const activeConversation = conversations.find((conversation) => conversation.id === activeConversationId);
+    setActiveConversationTargetProfile(activeConversation?.otherParticipant ?? null);
+  }, [activeConversationId, conversations]);
+
+  useEffect(() => {
+    if (!activeConversationId) {
+      return;
+    }
+    fetchMessages(activeConversationId);
+  }, [activeConversationId, fetchMessages]);
+  useEffect(() => {
+    if (!activeConversationId && conversations.length > 0) {
+      setActiveConversationId(conversations[0].id);
+    }
+  }, [activeConversationId, conversations]);
+
+  const value = useMemo<ChatContextType>(
+    () => ({
+      isChatOpen,
+      isChatMaximized,
+      toggleChat: () => setIsChatOpen((prev) => !prev),
+      closeChat: () => {
+        setIsChatOpen(false);
+        setIsChatMaximized(false);
+      },
+      toggleMaximizeChat: () => setIsChatMaximized((prev) => !prev),
+      openChatWithUser: async (targetUserId: string) => {
+        if (!user) {
+          toast({ title: 'Please sign in', description: 'Sign in to start a chat.' });
+          return;
+        }
+        setIsChatOpen(true);
+        const result = await getOrCreateConversationAction(targetUserId);
+        if (result.error) {
+          toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
+          return;
+        }
+        if (result.data) {
+          await fetchConversations();
+          setActiveConversationId(result.data.id);
+        }
+      },
+      activeConversationId,
+      setActiveConversationId,
+      conversations,
+      messages,
+      isLoadingConversations,
+      isLoadingMessages,
+      sendMessage: async (content: string, type: 'text' | 'image' = 'text') => {
+        if (!activeConversationId) {
+          toast({ title: 'Select a chat', description: 'Choose a conversation first.' });
+          return false;
+        }
+        if (!content.trim()) {
+          return false;
+        }
+        const result = await sendMessageAction(activeConversationId, content.trim(), type);
+        if (result.error) {
+          toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
+          return false;
+        }
+        const newMessage = result.data;
+        if (!newMessage) {
+          return false;
+        }
+        setMessages((prev) => [...prev, newMessage]);
+        setConversations((prev) =>
+          prev.map((conversation) =>
+            conversation.id === activeConversationId
+              ? {
+                  ...conversation,
+                  last_message_content: newMessage.content,
+                  last_message_at: newMessage.created_at,
+                  unread_count: 0,
+                }
+              : conversation
+          )
+        );
+        await markMessagesAsReadAction(activeConversationId);
+        return true;
+      },
+      fetchConversations,
+      activeConversationTargetProfile,
+    }),
+    [
+      activeConversationId,
+      activeConversationTargetProfile,
+      conversations,
+      fetchConversations,
+      fetchMessages,
+      isChatMaximized,
+      isChatOpen,
+      isLoadingConversations,
+      isLoadingMessages,
+      messages,
+      toast,
+      user,
+    ]
+  );
+
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
+}
+
+export function useChat() {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error('useChat must be used within a ChatProvider');
+  }
+
+  return context;
+}
