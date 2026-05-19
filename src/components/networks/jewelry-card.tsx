@@ -1,9 +1,8 @@
-
-import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Gem, Palette, Tag } from 'lucide-react';
+import { Gem, Palette, Tag, Share2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 // Define a type for JewelryItem, consistent with what BusinessNetworkView saves
 export interface JewelryItem {
@@ -43,50 +42,59 @@ function normalizeImageUrl(rawUrl: string) {
   }
 }
 
-function canUseNextImage(src: string) {
-  if (src.startsWith('data:image/')) {
-    return false;
-  }
-  try {
-    const url = new URL(src);
-    const host = url.hostname.replace(/^www\./, '');
-    return host === 'placehold.co' || host === 'media.istockphoto.com';
-  } catch {
-    return false;
-  }
-}
-
-export function JewelryCard({ name, type, style, material, description, imageUrl, dataAiHint, className }: JewelryCardProps) {
+export function JewelryCard({ id, name, type, style, material, description, imageUrl, dataAiHint, className }: JewelryCardProps) {
   const normalizedImageUrl = normalizeImageUrl(imageUrl);
-  const useNextImage = canUseNextImage(normalizedImageUrl);
+  const { toast } = useToast();
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Create a shareable URL that points to this specific item
+    const url = new URL(window.location.href);
+    url.searchParams.set('item', id);
+    const shareUrl = url.toString();
+
+    if (navigator.share) {
+      navigator.share({
+        title: name,
+        text: `Check out this beautiful ${name}!`,
+        url: shareUrl,
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied!",
+        description: "The link to this jewelry item has been copied to your clipboard.",
+      });
+    }
+  };
 
   return (
-    <Card className={cn("overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full", className)}>
+    <Card className={cn("overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full relative group", className)}>
       <CardHeader className="p-0">
-        <div className="aspect-[3/2] relative w-full">
-          {useNextImage ? (
-            <Image
-              src={normalizedImageUrl}
-              alt={name}
-              layout="fill"
-              objectFit="cover"
-              className="transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={dataAiHint || name.toLowerCase().split(' ').slice(0, 2).join(' ')}
-            />
-          ) : (
-            <img
-              src={normalizedImageUrl}
-              alt={name}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
-              onError={(event) => {
-                const target = event.currentTarget;
-                if (target.src !== FALLBACK_IMAGE) {
-                  target.src = FALLBACK_IMAGE;
-                }
-              }}
-            />
-          )}
+        <div className="aspect-[3/2] relative w-full bg-gray-100">
+          <img
+            src={normalizedImageUrl}
+            alt={name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+            onError={(event) => {
+              const target = event.currentTarget;
+              if (target.src !== FALLBACK_IMAGE) {
+                target.src = FALLBACK_IMAGE;
+              }
+            }}
+          />
+          {/* Share Button placed on the image */}
+          <button
+            onClick={handleShare}
+            className="absolute right-3 bottom-3 rounded-full bg-white/90 p-2 shadow-sm transition hover:bg-white hover:text-primary z-10"
+            aria-label="Share item"
+            title="Share this item"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
         </div>
       </CardHeader>
       <CardContent className="p-4 flex-grow">
@@ -102,6 +110,3 @@ export function JewelryCard({ name, type, style, material, description, imageUrl
     </Card>
   );
 }
-
-
-    

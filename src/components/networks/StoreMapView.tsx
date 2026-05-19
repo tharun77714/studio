@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -18,8 +19,20 @@ interface StoreMapViewProps {
 }
 
 export function StoreMapView({ lat, lng }: StoreMapViewProps) {
+  const [mapKey, setMapKey] = useState<number>(0);
+
+  useEffect(() => {
+    // This forces React to create a brand new DOM element for the map 
+    // whenever it mounts or hot-reloads, completely bypassing the 
+    // "Map container is already initialized" error in StrictMode.
+    setMapKey(Math.random());
+  }, []);
+
+  if (mapKey === 0) return null;
+
   return (
     <MapContainer
+      key={mapKey}
       center={[lat, lng]}
       zoom={15}
       scrollWheelZoom={false}

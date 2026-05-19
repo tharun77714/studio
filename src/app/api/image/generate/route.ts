@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const DEFAULT_PROVIDER = 'hf-inference';
+const DEFAULT_PROVIDER = 'stabilityai';
 const DEFAULT_MODEL = 'stabilityai/stable-diffusion-xl-base-1.0';
 
 export async function POST(request: Request) {
