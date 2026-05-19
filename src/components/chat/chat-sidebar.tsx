@@ -40,8 +40,11 @@ export function ChatSidebar() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const timeout = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [messages, isChatOpen, activeConversationId]);
 
   const activeDisplayName =
     activeConversationTargetProfile?.business_name ||
