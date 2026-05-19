@@ -42,7 +42,7 @@ export function ChatSidebar() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-    }, 100);
+    }, 350);
     return () => clearTimeout(timeout);
   }, [messages, isChatOpen, activeConversationId]);
 
@@ -87,7 +87,11 @@ export function ChatSidebar() {
     };
     recognition.onerror = (event: any) => {
       setIsRecording(false);
-      toast({ title: 'Speech error', description: event.error ?? 'Could not capture speech.', variant: 'destructive' });
+      let errorMsg = event.error ?? 'Could not capture speech.';
+      if (event.error === 'network') {
+        errorMsg = 'Network error: Browsers like Brave strictly block speech recognition. Please try using Chrome or Edge.';
+      }
+      toast({ title: 'Speech error', description: errorMsg, variant: 'destructive' });
     };
     recognition.onend = () => {
       setIsRecording(false);
@@ -243,7 +247,17 @@ export function ChatSidebar() {
                       )}
                     >
                       {message.message_type === 'image' ? (
-                        <img src={message.content} alt="Shared" className="mb-2 max-h-48 w-full rounded-xl object-cover shadow-sm" />
+                        <img 
+                          src={message.content} 
+                          alt="Shared" 
+                          className="mb-2 max-h-48 w-full rounded-xl object-cover shadow-sm"
+                          onLoad={() => {
+                            const timeout = setTimeout(() => {
+                              messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+                            }, 50);
+                            return () => clearTimeout(timeout);
+                          }} 
+                        />
                       ) : (
                         <p className="leading-relaxed">{message.content}</p>
                       )}
