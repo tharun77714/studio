@@ -101,6 +101,12 @@ export function ChatSidebar() {
       return;
     }
 
+    if (file.size > 3 * 1024 * 1024) {
+      toast({ title: 'Image too large', description: 'Please select an image smaller than 3MB.', variant: 'destructive' });
+      event.target.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     setIsUploading(true);
     reader.onload = async () => {
