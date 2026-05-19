@@ -149,31 +149,56 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           toast({ title: 'Select a chat', description: 'Choose a conversation first.' });
           return false;
         }
-        if (!content.trim()) {
+        if (!content.trim() || !user) {
           return false;
         }
-        const result = await sendMessageAction(activeConversationId, content.trim(), type);
-        if (result.error) {
-          toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
-          return false;
-        }
-        const newMessage = result.data;
-        if (!newMessage) {
-          return false;
-        }
-        setMessages((prev) => [...prev, newMessage]);
+        
+        const tempId = `temp-${Date.now()}`;
+        const tempMessage: Message = {
+          id: tempId,
+          conversation_id: activeConversationId,
+          sender_id: user.id,
+          receiver_id: '',
+          content: content.trim(),
+          message_type: type,
+          created_at: new Date().toISOString(),
+          is_read: true,
+        };
+
+        // Optimistic UI update: show message instantly
+        setMessages((prev) => [...prev, tempMessage]);
         setConversations((prev) =>
           prev.map((conversation) =>
             conversation.id === activeConversationId
               ? {
                   ...conversation,
-                  last_message_content: newMessage.content,
-                  last_message_at: newMessage.created_at,
+                  last_message_content: content.trim(),
+                  last_message_at: tempMessage.created_at,
                   unread_count: 0,
                 }
               : conversation
           )
         );
+
+        // Run server action in background
+        const result = await sendMessageAction(activeConversationId, content.trim(), type);
+        
+        if (result.error) {
+          // Revert optimistic update on failure
+          setMessages((prev) => prev.filter(m => m.id !== tempId));
+          toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
+          return false;
+        }
+        
+        const newMessage = result.data;
+        if (!newMessage) {
+          setMessages((prev) => prev.filter(m => m.id !== tempId));
+          return false;
+        }
+        
+        // Replace temp message with real message
+        setMessages((prev) => prev.map(m => m.id === tempId ? newMessage : m));
+        
         await markMessagesAsReadAction(activeConversationId);
         return true;
       },
