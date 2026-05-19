@@ -603,8 +603,10 @@ export async function getFavoriteItemsByUser(userId: string) {
     if (favorites.length === 0) {
       return { data: [], error: null };
     }
-    const itemIds = favorites.map((favorite) => favorite.item_id);
-    const items = await db.collection<any>('jewelry_items').find({ _id: { $in: itemIds } }).toArray();
+    const objectItemIds = favorites
+      .filter(f => ObjectId.isValid(f.item_id))
+      .map(f => new ObjectId(f.item_id));
+    const items = await db.collection<any>('jewelry_items').find({ _id: { $in: objectItemIds } }).toArray();
     const profileIds = favorites.map((favorite) => favorite.business_id);
     const profiles = await db.collection<any>('profiles').find({ _id: { $in: profileIds } }).project({ business_name: 1 }).toArray();
     const profileMap = new Map(profiles.map((profile) => [profile._id, profile.business_name]));

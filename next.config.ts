@@ -6,23 +6,16 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
+        hostname: '**',
       },
       {
-        protocol: 'https',
-        hostname: 'media.istockphoto.com',
-        port: '',
-        pathname: '/**',
-      },
+        protocol: 'http',
+        hostname: '**',
+      }
     ],
   },
 };
