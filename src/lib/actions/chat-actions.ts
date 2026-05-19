@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from 'crypto';
+import { revalidatePath } from 'next/cache';
 import { getDb } from '@/lib/mongodb';
 import { getSessionUser } from '@/lib/session';
 import type { ConversationView, Message } from '@/types/chat';
@@ -75,6 +76,7 @@ export async function getOrCreateConversationAction(targetUserId: string): Promi
       };
       await db.collection<any>('conversations').insertOne(payload);
       activeConversation = payload;
+      revalidatePath('/', 'layout');
     }
 
     const otherProfile = await db.collection<any>('profiles').findOne({ _id: targetUserId });
@@ -218,6 +220,8 @@ export async function sendMessageAction(
       { _id: conversationId },
       { $set: { last_message_at: createdAt, last_message_content: content } }
     );
+    
+    revalidatePath('/', 'layout');
 
     return {
       data: {
@@ -245,6 +249,8 @@ export async function markMessagesAsReadAction(conversationId: string): Promise<
     await db
       .collection<any>('messages')
       .updateMany({ conversation_id: conversationId, receiver_id: sessionUser.id, is_read: false }, { $set: { is_read: true } });
+
+    revalidatePath('/', 'layout');
 
     return { data: true, error: null };
   } catch (error) {
