@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Gem, Palette, Tag, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { TiltCard } from '@/components/ui/tilt-card';
 
 // Define a type for JewelryItem, consistent with what BusinessNetworkView saves
 export interface JewelryItem {
@@ -71,42 +72,44 @@ export function JewelryCard({ id, name, type, style, material, description, imag
   };
 
   return (
-    <Card className={cn("overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full relative group", className)}>
-      <CardHeader className="p-0">
-        <div className="aspect-[3/2] relative w-full bg-gray-100">
-          <img
-            src={normalizedImageUrl}
-            alt={name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-            onError={(event) => {
-              const target = event.currentTarget;
-              if (target.src !== FALLBACK_IMAGE) {
-                target.src = FALLBACK_IMAGE;
-              }
-            }}
-          />
-          {/* Share Button placed on the image */}
-          <button
-            onClick={handleShare}
-            className="absolute right-3 bottom-3 rounded-full bg-white/90 p-2 shadow-sm transition hover:bg-white hover:text-primary z-10"
-            aria-label="Share item"
-            title="Share this item"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 flex-grow">
-        <CardTitle className="font-headline text-lg mb-1 leading-tight">{name}</CardTitle>
-        <CardDescription className="text-xs text-muted-foreground mb-2">{description}</CardDescription>
-        
-        <div className="flex flex-wrap gap-1 mt-2 text-xs">
-          <Badge variant="secondary" className="flex items-center gap-1"><Gem className="h-3 w-3"/> {material}</Badge>
-          <Badge variant="secondary" className="flex items-center gap-1"><Palette className="h-3 w-3"/> {style}</Badge>
-          {type && <Badge variant="secondary" className="flex items-center gap-1"><Tag className="h-3 w-3"/> {type}</Badge>}
-        </div>
-      </CardContent>
-    </Card>
+    <TiltCard className="h-full">
+      <Card className={cn("overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full relative group bg-card/80 backdrop-blur-md border border-white/20", className)}>
+        <CardHeader className="p-0">
+          <div className="aspect-[3/2] relative w-full bg-gray-100 overflow-hidden">
+            <img
+              src={normalizedImageUrl}
+              alt={name}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              loading="lazy"
+              onError={(event) => {
+                const target = event.currentTarget;
+                if (target.src !== FALLBACK_IMAGE) {
+                  target.src = FALLBACK_IMAGE;
+                }
+              }}
+            />
+            {/* Share Button placed on the image */}
+            <button
+              onClick={handleShare}
+              className="absolute right-3 bottom-3 rounded-full bg-white/90 p-2 shadow-sm transition hover:bg-primary hover:text-primary-foreground z-10 scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 duration-300"
+              aria-label="Share item"
+              title="Share this item"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 flex-grow bg-gradient-to-t from-background/80 to-transparent">
+          <CardTitle className="font-headline text-xl mb-1 leading-tight tracking-wide">{name}</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground mb-3 font-light leading-relaxed">{description}</CardDescription>
+          
+          <div className="flex flex-wrap gap-1 mt-2 text-xs">
+            <Badge variant="secondary" className="flex items-center gap-1 bg-secondary/50 hover:bg-secondary/80 font-medium"><Gem className="h-3 w-3"/> {material}</Badge>
+            <Badge variant="secondary" className="flex items-center gap-1 bg-secondary/50 hover:bg-secondary/80 font-medium"><Palette className="h-3 w-3"/> {style}</Badge>
+            {type && <Badge variant="secondary" className="flex items-center gap-1 bg-secondary/50 hover:bg-secondary/80 font-medium"><Tag className="h-3 w-3"/> {type}</Badge>}
+          </div>
+        </CardContent>
+      </Card>
+    </TiltCard>
   );
 }

@@ -17,8 +17,10 @@ export default {
     },
     extend: {
       fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'], // Same as body, can be customized if needed
+        headline: ['Playfair Display', 'serif'],
         code: ['monospace'],
       },
       colors: {
