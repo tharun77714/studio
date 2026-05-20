@@ -387,7 +387,7 @@ function SignInPageContent() {
                 <Sparkles className="h-4 w-4 shrink-0 mt-0.5" style={{ color: 'hsl(var(--accent))' }} />
                 <div>
                   <span className="font-semibold block text-white text-xs mb-0.5">🔒 Secure Supabase OTP Authentication</span>
-                  To simulate/test locally, you can configure **Test Phone Numbers** in your **Supabase Dashboard -> Authentication -> Providers -> Phone**!
+                  To simulate/test locally, you can configure **Test Phone Numbers** in your **Supabase Dashboard &rarr; Authentication &rarr; Providers &rarr; Phone**!
                 </div>
               </div>
 
