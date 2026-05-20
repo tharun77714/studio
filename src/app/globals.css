@@ -87,3 +87,43 @@
 .pac-item, .pac-item-query {
   pointer-events: auto !important; 
 }
+
+/* Luxury Glare Reflection Sweep */
+.luxury-glare-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.luxury-glare-container::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -150%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0.25) 45%,
+    rgba(212, 175, 55, 0.35) 50%,
+    rgba(255, 255, 255, 0.25) 55%,
+    rgba(255, 255, 255, 0) 80%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+.luxury-glare-container:hover::after {
+  animation: glare-sweep 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes glare-sweep {
+  0% {
+    left: -150%;
+  }
+  100% {
+    left: 150%;
+  }
+}

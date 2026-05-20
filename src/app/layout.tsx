@@ -4,6 +4,9 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/contexts/AuthContext'; // Import AuthProvider
 import { ChatProvider } from '@/contexts/ChatContext'; // Import ChatProvider
+import { SmoothScrollProvider } from '@/components/common/smooth-scroll-provider';
+import { CursorGlow } from '@/components/common/CursorGlow';
+import { MoltenGoldLoader } from '@/components/ui/molten-gold-loader';
 
 export const metadata: Metadata = {
   title: 'Sparkle Studio',
@@ -25,15 +28,20 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-sans antialiased text-foreground bg-background">
+      <body className="font-sans antialiased text-foreground bg-background overflow-x-hidden">
         <div className="film-grain" />
-        <AuthProvider>
-          <ChatProvider> 
-            {children}
-            <Toaster />
-          </ChatProvider>
-        </AuthProvider>
+        <SmoothScrollProvider>
+          <AuthProvider>
+            <ChatProvider> 
+              <MoltenGoldLoader />
+              <CursorGlow />
+              {children}
+              <Toaster />
+            </ChatProvider>
+          </AuthProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   );
 }
+

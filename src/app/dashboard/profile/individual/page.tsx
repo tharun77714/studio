@@ -21,10 +21,26 @@ import { format } from 'date-fns';
 
 const individualProfileSchema = z.object({
   full_name: z.string().min(2, "Full name is required."),
-  default_shipping_address_text: z.string().min(10, "Shipping address is required."),
-  default_shipping_address_lat: z.number().optional(),
-  default_shipping_address_lng: z.number().optional(),
-  individual_phone_number: z.string().min(10, "Phone number must be at least 10 digits.").regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format."),
+  default_shipping_address_text: z.string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => {
+      if (!val) return true;
+      return val.length >= 10;
+    }, {
+      message: "Shipping address must be at least 10 characters.",
+    }),
+  default_shipping_address_lat: z.number().optional().nullable(),
+  default_shipping_address_lng: z.number().optional().nullable(),
+  individual_phone_number: z.string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => {
+      if (!val) return true;
+      return /^\+?[1-9]\d{1,14}$/.test(val) && val.length >= 10;
+    }, {
+      message: "Phone number must be at least 10 digits and in a valid format (e.g., +919876543210).",
+    }),
 });
 
 type IndividualProfileFormValues = z.infer<typeof individualProfileSchema>;

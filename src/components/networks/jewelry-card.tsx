@@ -75,7 +75,7 @@ export function JewelryCard({ id, name, type, style, material, description, imag
     <TiltCard className="h-full">
       <Card className={cn("overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full relative group bg-card/80 backdrop-blur-md border border-white/20", className)}>
         <CardHeader className="p-0">
-          <div className="aspect-[3/2] relative w-full bg-gray-100 overflow-hidden">
+          <div className="aspect-[3/2] relative w-full bg-gray-100 overflow-hidden luxury-glare-container">
             <img
               src={normalizedImageUrl}
               alt={name}

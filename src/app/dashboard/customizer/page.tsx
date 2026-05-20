@@ -74,10 +74,30 @@ export default function CustomizerPage() {
   const [isRecording, setIsRecording] = useState<boolean>(false); // State for recording status
   const [recognition, setRecognition] = useState<any>(null); // State for SpeechRecognition instance
   const [isMounted, setIsMounted] = useState(false);
+  
+  // Custom luxury 3D integration framework hooks
+  const [previewMode, setPreviewMode] = useState<"2d" | "3d">("2d");
+  const [splineUrl, setSplineUrl] = useState<string>("https://prod.spline.design/k8dpeOOeO1nCXtlG/scene.splinecode"); // Default premium interactive WebGL scene
+  const [customSplineInput, setCustomSplineInput] = useState<string>("");
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Load Spline WebGL Script dynamically to avoid bundling issues
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/@splinetool/viewer@1.9.0/build/spline-viewer.js";
+    script.type = "module";
+    document.body.appendChild(script);
+    
+    return () => {
+      // Clean up script on unmount
+      const existingScript = document.querySelector('script[src*="spline-viewer"]');
+      if (existingScript) {
+        document.body.removeChild(existingScript);
+      }
+    };
   }, []);
+
 
   const clearCustomizationInputs = () => {
     // Stop recording if active when clearing inputs
@@ -672,23 +692,118 @@ export default function CustomizerPage() {
           )}
 
           {customizedImageDataUri && !isLoading && (
-            <Card className={`animate-in fade-in duration-500 ${(!baseImageDataUri || baseImageFile) && !isLoading ? 'md:col-span-2' : ''}`}>
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center">
-                    <Sparkles className="mr-2 h-5 w-5 text-primary"/>
-                    Latest AI Result
+            <Card className={`animate-in fade-in duration-500 overflow-hidden bg-card/60 backdrop-blur-2xl border border-primary/20 shadow-2xl ${(!baseImageDataUri || baseImageFile) && !isLoading ? 'md:col-span-2' : ''}`}>
+              <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-white/5">
+                <CardTitle className="text-xl flex items-center tracking-wide font-medium">
+                  <Sparkles className="mr-2 h-5 w-5 text-primary"/>
+                  Luxury Atelier Result
                 </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col justify-center items-center p-4 min-h-[300px]">
-                <Image src={customizedImageDataUri} alt="Customized or Generated Jewelry" width={400} height={400} className="rounded-lg object-contain max-h-[400px]" />
-                <div className="flex gap-2 mt-4 w-full sm:w-auto">
-                    <Button onClick={handleViewDetails} variant="outline" className="flex-1 border-accent text-accent hover:bg-accent/10" disabled={!customizedImageDataUri || isLoading}>
-                      <Eye className="mr-2 h-4 w-4" /> Details
-                    </Button>
+                
+                {/* Segmented Tab Control */}
+                <div className="flex bg-black/50 p-1 rounded-full border border-white/10 w-fit">
+                  <button 
+                    type="button"
+                    onClick={() => setPreviewMode("2d")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${previewMode === "2d" ? "bg-primary text-black" : "text-muted-foreground hover:text-white"}`}
+                  >
+                    2D Render
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setPreviewMode("3d")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${previewMode === "3d" ? "bg-primary text-black" : "text-muted-foreground hover:text-white"}`}
+                  >
+                    Interactive 3D
+                  </button>
                 </div>
-                <Button onClick={handleSaveModel} variant="default" className="mt-4 w-full">
-                  Save Model
-                </Button>
+              </CardHeader>
+              
+              <CardContent className="p-6">
+                {previewMode === "2d" ? (
+                  <div className="flex flex-col items-center">
+                    {/* 2D Mode with Champagne Gold Glare Sweep */}
+                    <div className="relative group rounded-lg overflow-hidden border border-white/15 bg-black/40 luxury-glare-container flex justify-center items-center w-full max-w-[400px] aspect-square p-4">
+                      <Image 
+                        src={customizedImageDataUri} 
+                        alt="Customized or Generated Jewelry" 
+                        width={400} 
+                        height={400} 
+                        className="rounded-lg object-contain max-h-[350px] transition-transform duration-700 group-hover:scale-105" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                        <span className="text-xs text-primary tracking-widest uppercase font-light">Hover for sweep glint reflection</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 mt-6 w-full max-w-[400px]">
+                      <Button onClick={handleViewDetails} variant="outline" className="flex-1 border-primary/30 text-primary hover:bg-primary/10 transition-colors" disabled={!customizedImageDataUri || isLoading}>
+                        <Eye className="mr-2 h-4 w-4" /> Editorial Details
+                      </Button>
+                      <Button onClick={handleSaveModel} variant="default" className="flex-grow bg-primary text-black hover:bg-primary/90 transition-shadow hover:shadow-lg hover:shadow-primary/10">
+                        Archive Model
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    {/* 3D Mode with Spline Interactive Embed */}
+                    <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] min-h-[350px] max-h-[450px] rounded-lg border border-primary/20 bg-black/60 overflow-hidden shadow-inner flex items-center justify-center">
+                      {/* Premium shimmering background skeleton loader */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-pulse pointer-events-none" />
+                      
+                      {/* @ts-ignore */}
+                      <spline-viewer 
+                        url={splineUrl} 
+                        style={{ display: "block", width: "100%", height: "100%", minHeight: "350px" }} 
+                      />
+                      
+                      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 flex items-center gap-1.5 text-[10px] text-primary uppercase tracking-widest pointer-events-none">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
+                        WebGL Active
+                      </div>
+                    </div>
+                    
+                    {/* Instructions and Custom spline code input */}
+                    <div className="mt-6 p-5 rounded-lg bg-black/35 border border-primary/15 backdrop-blur-md text-left">
+                      <h4 className="text-primary text-xs font-semibold tracking-widest uppercase mb-2 flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4" /> Showcase Custom 3D Design
+                      </h4>
+                      <p className="text-xs text-gray-400 leading-relaxed mb-4">
+                        Bring your bespoke creations to life! Create a ring model in **Spline** (Torus shape gold band, Glass/Refraction gem with Index 2.42), export it via the <strong>Viewer</strong> tab, and paste the <code>scene.splinecode</code> link below to render it instantly.
+                      </p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                        <Input 
+                          value={customSplineInput}
+                          onChange={(e) => setCustomSplineInput(e.target.value)}
+                          placeholder="e.g., https://prod.spline.design/.../scene.splinecode"
+                          className="bg-black/60 border border-primary/20 focus-visible:ring-primary text-xs flex-grow h-10"
+                        />
+                        <Button 
+                          type="button"
+                          onClick={() => {
+                            if (customSplineInput.trim()) {
+                              setSplineUrl(customSplineInput.trim());
+                              toast({
+                                title: "3D Scene Updated",
+                                description: "Your custom interactive jewelry model has been loaded successfully!",
+                              });
+                            } else {
+                              toast({
+                                title: "Empty URL",
+                                description: "Please paste a valid Spline scene URL first.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          className="bg-primary text-black hover:bg-primary/95 text-xs px-6 h-10 shrink-0 font-medium tracking-wider uppercase"
+                        >
+                          Embed 3D
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

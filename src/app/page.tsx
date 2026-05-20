@@ -6,6 +6,7 @@ import { PageTransition } from '@/components/ui/page-transition';
 import { SvgDrawSparkle } from '@/components/ui/svg-draw-sparkle';
 import { TextReveal } from '@/components/ui/text-reveal';
 import { MagneticButton } from '@/components/ui/magnetic-button';
+import { GoldDustCanvas } from '@/components/landing/gold-dust-canvas';
 import { useRef } from "react";
 import Link from "next/link";
 
@@ -25,7 +26,11 @@ export default function LandingPage() {
     <PageTransition className="flex flex-col relative w-full bg-background min-h-[150vh]" key="landing">
       <div ref={containerRef} className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
         
+        {/* Cinematic Particles */}
+        <GoldDustCanvas />
+
         {/* Parallax Background Orbs */}
+
         <motion.div 
           style={{ y: yBackground }}
           className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center opacity-40"
