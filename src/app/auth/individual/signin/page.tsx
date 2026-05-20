@@ -13,8 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Lock, LogIn, Loader2, Phone, ShieldCheck, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import supabase from '@/lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
+
 
 // Zod schemas
 const emailSignInSchema = z.object({
@@ -202,25 +202,30 @@ function SignInPageContent() {
     }
   }
 
-  // 4. Handle Supabase Google Sign-In Redirect
+  // 4. Handle Google Sign-In — direct Google OAuth (no Supabase)
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!clientId) throw new Error('Google Client ID is not configured.');
+
+      const redirectUri = `${window.location.origin}/api/auth/callback/google`;
+
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: 'code',
+        scope: 'openid email profile',
+        access_type: 'offline',
+        prompt: 'select_account',
       });
 
-      if (error) {
-        throw error;
-      }
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
     } catch (error: any) {
       toast({
-        title: "Google Sign In Failed",
-        description: error.message || "Failed to initiate Google OAuth flow.",
-        variant: "destructive",
+        title: 'Google Sign In Failed',
+        description: error.message || 'Failed to initiate Google sign in.',
+        variant: 'destructive',
       });
       setIsLoading(false);
     }
