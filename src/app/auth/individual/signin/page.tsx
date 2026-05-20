@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Lock, LogIn, Loader2, Phone, ShieldCheck, Sparkles, MessageSquare, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Lock, LogIn, Loader2, Phone, ShieldCheck, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -382,15 +382,6 @@ function SignInPageContent() {
               transition={{ duration: 0.2 }}
               className="space-y-4"
             >
-              {/* Gold glass notification for Supabase Test numbers */}
-              <div className="p-3.5 bg-accent/5 border border-accent/10 text-accent rounded-lg text-xs flex gap-2.5 items-start font-sans leading-relaxed">
-                <Sparkles className="h-4 w-4 shrink-0 mt-0.5" style={{ color: 'hsl(var(--accent))' }} />
-                <div>
-                  <span className="font-semibold block text-white text-xs mb-0.5">🔒 Secure Supabase OTP Authentication</span>
-                  To simulate/test locally, you can configure **Test Phone Numbers** in your **Supabase Dashboard &rarr; Authentication &rarr; Providers &rarr; Phone**!
-                </div>
-              </div>
-
               {phoneState === 'idle' ? (
                 /* Step A: Request Code */
                 <Form {...phoneSendForm}>
