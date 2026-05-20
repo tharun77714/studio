@@ -130,26 +130,31 @@ function SignInPageContent() {
     }
   }
 
-  // 2. Request Supabase SMS OTP
+  // 2. Send OTP via our own API (Fast2SMS — any Indian number)
   async function onPhoneSendSubmit(data: PhoneSendFormValues) {
     setIsLoading(true);
     try {
-      // Trigger Supabase Sign-In OTP SMS
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: data.phone,
+      const response = await fetch('/api/auth/phone/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: data.phone }),
       });
 
-      if (error) {
-        throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Could not send OTP.');
       }
-      
-      setPhoneNumber(data.phone);
+
+      // Auto-format number for display (+91 prefix if needed)
+      const formattedPhone = /^\d{10}$/.test(data.phone) ? '+91' + data.phone : data.phone;
+      setPhoneNumber(formattedPhone);
       setPhoneState('code_sent');
-      setOtpTimer(300); // Reset timer to 5 minutes
-      
+      setOtpTimer(300);
+
       toast({
-        title: "OTP Dispatched",
-        description: `Verification SMS code sent to ${data.phone}.`,
+        title: "OTP Sent!",
+        description: `Verification code sent to ${formattedPhone}.`,
       });
     } catch (error: any) {
       toast({
@@ -162,54 +167,34 @@ function SignInPageContent() {
     }
   }
 
-  // 3. Verify OTP via Supabase + Sync to MongoDB
+  // 3. Verify OTP via our own API + auto create MongoDB user session
   async function onPhoneVerifySubmit(data: PhoneVerifyFormValues) {
     setIsLoading(true);
     try {
-      // Verify OTP Code on Supabase Client
-      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-        phone: phoneNumber,
-        token: data.code,
-        type: 'sms',
-      });
-
-      if (verifyError) {
-        throw verifyError;
-      }
-
-      if (!verifyData.session || !verifyData.user) {
-        throw new Error("Failed to initialize authentication session with Supabase.");
-      }
-      
-      // Post user information to MongoDB Sync Route to link 1-to-1
-      const syncResponse = await fetch('/api/auth/supabase-sync', {
+      const response = await fetch('/api/auth/phone/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: verifyData.user.id,
-          email: verifyData.user.email || `${phoneNumber}@sparklestudio.co.in`,
-          phone: phoneNumber,
-          name: verifyData.user.user_metadata?.full_name || `Phone Member ${phoneNumber.slice(-4)}`
-        }),
+        body: JSON.stringify({ phone: phoneNumber, code: data.code }),
       });
 
-      const syncResult = await syncResponse.json();
-      if (!syncResponse.ok) {
-        throw new Error(syncResult.error || 'Failed to sync authentication session with MongoDB database.');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'OTP verification failed.');
       }
-      
-      // Update custom react context
-      await refreshProfile(syncResult);
+
+      // Sync with local auth context
+      await refreshProfile(result);
 
       toast({
-        title: "Welcome to Sparkle Studio",
-        description: "Phone verification successful. Accessing luxury dashboard...",
+        title: "Welcome to Sparkle Studio!",
+        description: "Phone verified. Accessing your dashboard...",
       });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: "Verification Failed",
-        description: error.message || "Invalid OTP code or verification error.",
+        description: error.message || "Invalid OTP. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -10,108 +10,86 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Phone number is required.' }, { status: 400 });
     }
 
-    // Sanitize phone number (strip whitespace, ensure format)
+    // Sanitize phone number
     phone = phone.trim().replace(/\s+/g, '');
 
-    // Validate phone number format (must be at least 10 digits)
-    if (!/^\+?[1-9]\d{9,14}$/.test(phone)) {
-      return NextResponse.json({ error: 'Invalid phone number format. Provide a valid mobile number (e.g., +919876543210).' }, { status: 400 });
+    // Auto-add +91 if it's a 10-digit Indian number
+    if (/^\d{10}$/.test(phone)) {
+      phone = '+91' + phone;
     }
 
-    // Generate a secure 6-digit verification code
+    // Validate format
+    if (!/^\+[1-9]\d{9,14}$/.test(phone)) {
+      return NextResponse.json({
+        error: 'Invalid phone number. Enter 10 digits (e.g. 9876543210) or full format (+919876543210).',
+      }, { status: 400 });
+    }
+
+    // Generate secure 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Expires in 5 minutes
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     const db = await getDb();
 
-    // Upsert verification code into MongoDB 'phone_otps' collection
+    // Save OTP in MongoDB
     await db.collection('phone_otps').updateOne(
       { phone },
-      {
-        $set: {
-          phone,
-          otp,
-          expires_at: expiresAt,
-          attempts: 0,
-        }
-      },
+      { $set: { phone, otp, expires_at: expiresAt, attempts: 0 } },
       { upsert: true }
     );
 
-    // Check for Twilio Credentials
-    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
-    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-    const twilioFromNumber = process.env.TWILIO_FROM_NUMBER;
-    const twilioServiceSid = process.env.TWILIO_SERVICE_SID;
+    const fast2smsKey = process.env.FAST2SMS_API_KEY;
 
-    const isTwilioConfigured = twilioAccountSid && twilioAuthToken && (twilioFromNumber || twilioServiceSid);
-
-    if (isTwilioConfigured) {
-      // 1. Production Mode: Send actual SMS via Twilio
+    if (fast2smsKey) {
+      // Fast2SMS — works for ALL Indian numbers, no trial restrictions
       try {
-        if (twilioServiceSid) {
-          // Use Twilio Verify Service if SID is set
-          const response = await fetch(`https://verify.twilio.com/v2/Services/${twilioServiceSid}/Verifications`, {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Basic ' + Buffer.from(`${twilioAccountSid}:${twilioAuthToken}`).toString('base64'),
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-              To: phone,
-              Channel: 'sms',
-            }),
-          });
+        // Fast2SMS needs 10-digit number without country code
+        const mobileNumber = phone.replace(/^\+91/, '');
 
-          if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.message || 'Twilio Verify API call failed.');
-          }
-        } else {
-          // Fallback to standard Twilio SMS Message
-          const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Basic ' + Buffer.from(`${twilioAccountSid}:${twilioAuthToken}`).toString('base64'),
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-              From: twilioFromNumber!,
-              To: phone,
-              Body: `Your Sparkle Studio verification code is: ${otp}. Valid for 5 minutes.`,
-            }),
-          });
+        const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+          method: 'POST',
+          headers: {
+            'authorization': fast2smsKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            route: 'otp',
+            variables_values: otp,
+            numbers: mobileNumber,
+          }),
+        });
 
-          if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.message || 'Twilio SMS sending failed.');
-          }
+        const data = await response.json();
+
+        if (!data.return) {
+          throw new Error(data.message?.[0] || 'Fast2SMS failed to deliver.');
         }
 
-        return NextResponse.json({ success: true, mode: 'production', message: 'SMS OTP sent successfully via Twilio.' });
-      } catch (twilioError: any) {
-        console.error('Twilio SMS delivery failed, falling back to mock mode:', twilioError);
-        // Fail-safe graceful fallback to local development mock if Twilio credentials fail
         return NextResponse.json({
           success: true,
-          mode: 'mock',
-          otp,
-          message: `SMS failed. Running in developer mock mode. Code: ${otp}`,
+          mode: 'production',
+          message: `OTP sent to ${phone}.`,
         });
+
+      } catch (smsError: any) {
+        console.error('Fast2SMS error:', smsError.message);
+        return NextResponse.json({
+          error: `SMS sending failed: ${smsError.message}`,
+        }, { status: 500 });
       }
     } else {
-      // 2. Local Development Mock Mode
-      console.log(`[MOCK SMS SERVICE] Sent OTP code: ${otp} to phone number: ${phone}`);
+      // Development mock — OTP shown in server console
+      console.log(`[MOCK SMS] OTP for ${phone}: ${otp}`);
       return NextResponse.json({
         success: true,
         mode: 'mock',
         otp,
-        message: `Running in developer mock mode. Code: ${otp}`,
+        message: `Dev mode: OTP is ${otp}`,
       });
     }
 
   } catch (error: any) {
-    console.error('Phone SMS OTP send handler failed:', error);
-    return NextResponse.json({ error: error.message || 'An unexpected error occurred sending the verification code.' }, { status: 500 });
+    console.error('Phone send error:', error);
+    return NextResponse.json({ error: error.message || 'Unexpected error.' }, { status: 500 });
   }
 }
