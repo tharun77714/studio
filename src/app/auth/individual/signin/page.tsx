@@ -52,7 +52,7 @@ export default function IndividualSignInPage() {
       if (!response.ok) {
         throw new Error(result.error || 'Invalid credentials.');
       }
-      await refreshProfile();
+      await refreshProfile(result);
       toast({
         title: "Sign In Successful!",
         description: "Welcome to Sparkle Studio.", 

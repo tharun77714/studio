@@ -37,7 +37,7 @@ interface AuthContextType {
   profile: Profile | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: (prefetchedData?: { session: Session | null; profile: Profile | null }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,7 +48,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshProfile = useCallback(async () => {
+  const refreshProfile = useCallback(async (prefetchedData?: { session: Session | null; profile: Profile | null }) => {
+    if (prefetchedData) {
+      setSession(prefetchedData.session);
+      setUser(prefetchedData.session?.user ?? null);
+      setProfile(prefetchedData.profile);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/auth/session', {
