@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
         const data = await response.json();
 
         if (!data.return) {
-          throw new Error(data.message?.[0] || 'Fast2SMS failed to deliver.');
+          const errorMessage = Array.isArray(data.message) ? data.message[0] : data.message;
+          throw new Error(errorMessage || 'Fast2SMS failed to deliver.');
         }
 
         return NextResponse.json({
