@@ -241,13 +241,13 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (profile?.profile_completed) {
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
-  }, [profile, router]);
+  }, [profile]);
 
   const handleSuccess = async () => {
     await refreshProfile();
-    router.push('/dashboard');
+    window.location.href = '/dashboard';
   };
 
   if (authLoading || !session) {
