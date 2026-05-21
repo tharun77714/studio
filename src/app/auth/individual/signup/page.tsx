@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Lock, MapPin, Phone, ArrowRight, Loader2, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { AddressAutocompleteInput } from '@/components/common/address-autocomplete-input'; // Assuming this component exists and is correctly implemented
 import dynamic from 'next/dynamic';
+import { PhoneInput } from '@/components/common/phone-input';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const individualSignUpSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -23,7 +25,9 @@ const individualSignUpSchema = z.object({
   defaultShippingAddressText: z.string().optional(),
   defaultShippingAddressLat: z.number().optional(),
   defaultShippingAddressLng: z.number().optional(),
-  individualPhoneNumber: z.string().min(10, "Phone number must be at least 10 digits.").regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format."),
+  individualPhoneNumber: z.string().refine((val) => isValidPhoneNumber(val), {
+    message: "Invalid phone number.",
+  }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -186,7 +190,7 @@ export default function IndividualSignUpPage() {
                 <FormItem>
                   <FormLabel className="flex items-center"><Phone className="mr-2 h-4 w-4" />Phone Number</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+1234567890 (with country code)" {...field} />
+                    <PhoneInput placeholder="Enter phone number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -15,6 +15,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import dynamic from 'next/dynamic';
+import { PhoneInput } from '@/components/common/phone-input';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const DynamicAddressAutocompleteInput = dynamic(() =>
   import('@/components/common/address-autocomplete-input').then((mod) => mod.AddressAutocompleteInput),
@@ -29,7 +31,9 @@ const StoreLocationPicker = dynamic(
 const individualSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
   email: z.string().email("Invalid email address."),
-  phone: z.string().min(10, "Phone number must be at least 10 digits.").regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format."),
+  phone: z.string().refine((val) => isValidPhoneNumber(val), {
+    message: "Invalid phone number.",
+  }),
   defaultShippingAddressText: z.string().optional(),
   defaultShippingAddressLat: z.number().optional(),
   defaultShippingAddressLng: z.number().optional(),
@@ -44,7 +48,9 @@ const businessSchema = z.object({
   businessAddressLat: z.number().optional(),
   businessAddressLng: z.number().optional(),
   contactPersonName: z.string().min(2, "Contact person name is required."),
-  contactPhoneNumber: z.string().min(10, "Phone number must be at least 10 digits.").regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format."),
+  contactPhoneNumber: z.string().refine((val) => isValidPhoneNumber(val), {
+    message: "Invalid phone number.",
+  }),
 });
 
 const businessTypes = ["Retailer", "Wholesaler", "Artisan/Designer", "Manufacturer", "Online Store", "Other"];
@@ -102,7 +108,7 @@ function IndividualOnboardingForm({ profile, onSuccess }: { profile: any, onSucc
         )} />
         <FormField control={form.control} name="phone" render={({ field }) => (
           <FormItem><FormLabel className="flex items-center"><Phone className="mr-2 h-4 w-4" />Phone Number</FormLabel>
-            <FormControl><Input type="tel" placeholder="+1234567890" {...field} /></FormControl><FormMessage />
+            <FormControl><PhoneInput placeholder="Enter phone number" {...field} /></FormControl><FormMessage />
           </FormItem>
         )} />
         <FormItem>
@@ -223,7 +229,7 @@ function BusinessOnboardingForm({ profile, onSuccess }: { profile: any, onSucces
         )} />
         <FormField control={form.control} name="contactPhoneNumber" render={({ field }) => (
           <FormItem><FormLabel className="flex items-center"><Phone className="mr-2 h-4 w-4" />Contact Phone</FormLabel>
-            <FormControl><Input type="tel" placeholder="+1234567890" {...field} /></FormControl><FormMessage />
+            <FormControl><PhoneInput placeholder="Enter phone number" {...field} /></FormControl><FormMessage />
           </FormItem>
         )} />
         <Button type="submit" className="w-full btn-primary-sparkle text-lg py-3 mt-6" disabled={isSubmitting}>

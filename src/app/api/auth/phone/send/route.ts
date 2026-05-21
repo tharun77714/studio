@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,20 +11,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Phone number is required.' }, { status: 400 });
     }
 
-    // Sanitize phone number
-    phone = phone.trim().replace(/\s+/g, '');
-
-    // Auto-add +91 if it's a 10-digit Indian number
-    if (/^\d{10}$/.test(phone)) {
-      phone = '+91' + phone;
-    }
-
-    // Validate format
-    if (!/^\+[1-9]\d{9,14}$/.test(phone)) {
+    // Validate format using libphonenumber-js
+    if (!isValidPhoneNumber(phone)) {
       return NextResponse.json({
-        error: 'Invalid phone number. Enter 10 digits (e.g. 9876543210) or full format (+919876543210).',
+        error: 'Invalid phone number format. Please ensure you include the correct country code.',
       }, { status: 400 });
     }
+    
+    // Auto-format to standard E.164
+    const parsedPhone = parsePhoneNumber(phone);
+    phone = parsedPhone.number;
 
     // Generate secure 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();

@@ -14,7 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Lock, LogIn, Loader2, Phone, ShieldCheck, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { PhoneInput } from '@/components/common/phone-input';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 // Zod schemas
 const emailSignInSchema = z.object({
@@ -23,7 +24,9 @@ const emailSignInSchema = z.object({
 });
 
 const phoneSendSchema = z.object({
-  phone: z.string().min(10, "Phone number must be at least 10 digits.").regex(/^\+?[1-9]\d{9,14}$/, "Invalid format. E.g., +919876543210"),
+  phone: z.string().refine((val) => isValidPhoneNumber(val), {
+    message: "Invalid phone number.",
+  }),
 });
 
 const phoneVerifySchema = z.object({
@@ -146,15 +149,13 @@ function SignInPageContent() {
         throw new Error(result.error || 'Could not send OTP.');
       }
 
-      // Auto-format number for display (+91 prefix if needed)
-      const formattedPhone = /^\d{10}$/.test(data.phone) ? '+91' + data.phone : data.phone;
-      setPhoneNumber(formattedPhone);
+      setPhoneNumber(data.phone);
       setPhoneState('code_sent');
       setOtpTimer(300);
 
       toast({
         title: "OTP Sent!",
-        description: `Verification code sent to ${formattedPhone}.`,
+        description: `Verification code sent to ${data.phone}.`,
       });
     } catch (error: any) {
       toast({
@@ -387,9 +388,8 @@ function SignInPageContent() {
                             Mobile Number
                           </FormLabel>
                           <FormControl>
-                            <Input 
-                              type="tel" 
-                              placeholder="+919876543210" 
+                            <PhoneInput 
+                              placeholder="Enter phone number" 
                               className="bg-neutral-900/40 border-white/10 text-white placeholder-neutral-600 focus-visible:ring-accent" 
                               {...field} 
                             />

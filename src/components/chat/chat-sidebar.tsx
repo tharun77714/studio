@@ -81,7 +81,6 @@ export function ChatSidebar() {
 
     recognition.onstart = () => {
       setIsRecording(true);
-      toast({ title: 'Recording', description: 'Listening...' });
     };
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
@@ -317,7 +316,7 @@ export function ChatSidebar() {
                   className={cn(
                     "group flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition shadow-sm",
                     isRecording 
-                      ? "bg-red-500 text-white animate-pulse" 
+                      ? "bg-red-500/80 text-white" 
                       : "bg-background/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
                   )}
                   disabled={!isSpeechSupported}

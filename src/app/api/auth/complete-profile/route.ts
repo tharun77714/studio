@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { getSessionUser, createSession } from '@/lib/session';
+import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +30,11 @@ export async function POST(request: NextRequest) {
       }
 
       const normalizedEmail = email.trim().toLowerCase();
-      const normalizedPhone = phone.trim().replace(/\s+/g, '');
+      if (!isValidPhoneNumber(phone)) {
+        return NextResponse.json({ error: 'Invalid phone number format.' }, { status: 400 });
+      }
+      const parsedPhone = parsePhoneNumber(phone);
+      const normalizedPhone = parsedPhone.number;
 
       if (normalizedEmail !== sessionUser.email) {
         const existingUser = await db.collection<any>('users').findOne({ email: normalizedEmail, _id: { $ne: sessionUser.id } });
@@ -64,7 +69,11 @@ export async function POST(request: NextRequest) {
       }
 
       const normalizedEmail = email.trim().toLowerCase();
-      const normalizedPhone = contactPhoneNumber.trim().replace(/\s+/g, '');
+      if (!isValidPhoneNumber(contactPhoneNumber)) {
+        return NextResponse.json({ error: 'Invalid phone number format.' }, { status: 400 });
+      }
+      const parsedPhone = parsePhoneNumber(contactPhoneNumber);
+      const normalizedPhone = parsedPhone.number;
 
       if (normalizedEmail !== sessionUser.email) {
         const existingUser = await db.collection<any>('users').findOne({ email: normalizedEmail, _id: { $ne: sessionUser.id } });

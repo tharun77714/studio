@@ -16,6 +16,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import dynamic from 'next/dynamic';
+import { PhoneInput } from '@/components/common/phone-input';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const businessSignUpSchema = z.object({
   businessName: z.string().min(2, "Business name must be at least 2 characters."),
@@ -27,7 +29,9 @@ const businessSignUpSchema = z.object({
   businessAddressLat: z.number().optional(),
   businessAddressLng: z.number().optional(),
   contactPersonName: z.string().min(2, "Contact person name is required."),
-  contactPhoneNumber: z.string().min(10, "Phone number must be at least 10 digits.").regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format."),
+  contactPhoneNumber: z.string().refine((val) => isValidPhoneNumber(val), {
+    message: "Invalid phone number.",
+  }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -295,7 +299,7 @@ export default function BusinessSignUpPage() {
                 <FormItem>
                   <FormLabel className="flex items-center"><Phone className="mr-2 h-4 w-4" />Contact Phone Number</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+1234567890" {...field} />
+                    <PhoneInput placeholder="Enter phone number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

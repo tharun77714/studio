@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
 import { auditLogCrossPortal, getRoleMismatchErrorMessage } from '@/lib/rbac';
 import { ObjectId } from 'mongodb';
+import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +14,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Phone number, verification code, and expectedRole are required.' }, { status: 400 });
     }
 
-    phone = phone.trim().replace(/\s+/g, '');
+    if (!isValidPhoneNumber(phone)) {
+      return NextResponse.json({ error: 'Invalid phone number format.' }, { status: 400 });
+    }
+    const parsedPhone = parsePhoneNumber(phone);
+    phone = parsedPhone.number;
     code = code.trim();
 
     const db = await getDb();

@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import { getDb } from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
 import { auditLogCrossPortal, getRoleMismatchErrorMessage } from '@/lib/rbac';
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 
 function nowIso() {
   return new Date().toISOString();
@@ -40,6 +41,11 @@ export async function createBusinessUser(data: BusinessSignUpData) {
     throw new Error('An account with this email already exists.');
   }
 
+  if (!isValidPhoneNumber(data.contactPhoneNumber)) {
+    throw new Error('Invalid contact phone number format.');
+  }
+  const normalizedPhone = parsePhoneNumber(data.contactPhoneNumber).number;
+
   const userId = new ObjectId().toHexString();
   const createdAt = nowIso();
   const passwordHash = await bcrypt.hash(data.password, 12);
@@ -64,7 +70,7 @@ export async function createBusinessUser(data: BusinessSignUpData) {
     business_address_lat: data.businessAddressLat ?? null,
     business_address_lng: data.businessAddressLng ?? null,
     contact_person_name: data.contactPersonName,
-    contact_phone_number: data.contactPhoneNumber,
+    contact_phone_number: normalizedPhone,
     profile_completed: true,
     created_at: createdAt,
     updated_at: createdAt,
@@ -92,6 +98,11 @@ export async function createIndividualUser(data: IndividualSignUpData) {
     throw new Error('An account with this email already exists.');
   }
 
+  if (!isValidPhoneNumber(data.individualPhoneNumber)) {
+    throw new Error('Invalid phone number format.');
+  }
+  const normalizedPhone = parsePhoneNumber(data.individualPhoneNumber).number;
+
   const userId = new ObjectId().toHexString();
   const createdAt = nowIso();
   const passwordHash = await bcrypt.hash(data.password, 12);
@@ -113,7 +124,7 @@ export async function createIndividualUser(data: IndividualSignUpData) {
     default_shipping_address_text: data.defaultShippingAddressText || '',
     default_shipping_address_lat: data.defaultShippingAddressText ? (data.defaultShippingAddressLat ?? null) : null,
     default_shipping_address_lng: data.defaultShippingAddressText ? (data.defaultShippingAddressLng ?? null) : null,
-    individual_phone_number: data.individualPhoneNumber,
+    individual_phone_number: normalizedPhone,
     profile_completed: true,
     created_at: createdAt,
     updated_at: createdAt,
