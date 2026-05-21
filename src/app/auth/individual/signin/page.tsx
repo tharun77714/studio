@@ -344,7 +344,7 @@ function SignInPageContent() {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute inset-y-0 right-0 px-3 flex items-center text-neutral-400 hover:text-white"
                           >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                           </button>
                         </div>
                         <FormMessage />

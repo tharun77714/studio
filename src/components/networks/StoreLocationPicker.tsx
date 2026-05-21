@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import { MapContainer, Marker, TileLayer, useMapEvents, useMap } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, MapPin } from 'lucide-react';
@@ -20,6 +20,14 @@ const DefaultIcon = L.icon({
 interface StoreLocationPickerProps {
   initialLocation?: { lat: number; lng: number };
   onLocationSelectAction: (location: { lat: number; lng: number }) => void;
+}
+
+function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([lat, lng]);
+  }, [lat, lng, map]);
+  return null;
 }
 
 function LocationMarker({
@@ -105,6 +113,7 @@ export function StoreLocationPicker({ initialLocation, onLocationSelectAction }:
       <div className="h-[320px] w-full overflow-hidden rounded-lg border">
         <MapContainer center={[position.lat, position.lng]} zoom={13} scrollWheelZoom className="h-full w-full">
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <RecenterMap lat={position.lat} lng={position.lng} />
           <LocationMarker position={position} onMove={updatePosition} />
         </MapContainer>
       </div>

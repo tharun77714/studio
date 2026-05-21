@@ -148,7 +148,7 @@ export default function IndividualSignUpPage() {
                         <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
                       </FormControl>
                       <button type="button" onClick={togglePasswordVisibility} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
-                        {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                        {showPassword ? <EyeIcon className="h-5 w-5" /> : <EyeOffIcon className="h-5 w-5" />}
                       </button>
                     </div>
                     <FormMessage />

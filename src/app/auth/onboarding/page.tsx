@@ -181,7 +181,7 @@ function BusinessOnboardingForm({ profile, onSuccess }: { profile: any, onSucces
         )} />
         <FormField control={form.control} name="businessType" render={({ field }) => (
           <FormItem><FormLabel className="flex items-center"><Briefcase className="mr-2 h-4 w-4" />Business Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl><SelectTrigger><SelectValue placeholder="Select business type" /></SelectTrigger></FormControl>
               <SelectContent>
                 {businessTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
