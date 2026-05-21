@@ -53,8 +53,10 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            route: 'otp',
-            variables_values: otp,
+            route: 'q',
+            message: `Your Sparkle Studio verification code is: ${otp}`,
+            language: 'english',
+            flash: 0,
             numbers: mobileNumber,
           }),
         });
