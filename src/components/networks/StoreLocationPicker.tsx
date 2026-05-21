@@ -19,7 +19,7 @@ const DefaultIcon = L.icon({
 
 interface StoreLocationPickerProps {
   initialLocation?: { lat: number; lng: number };
-  onLocationSelectAction: (location: { lat: number; lng: number }) => void;
+  onLocationSelectAction: (location: { lat: number; lng: number; address?: string }) => void;
 }
 
 function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
@@ -50,7 +50,9 @@ export function StoreLocationPicker({ initialLocation, onLocationSelectAction }:
   const { toast } = useToast();
   const [latInput, setLatInput] = useState((initialLocation?.lat ?? 17.720378).toString());
   const [lngInput, setLngInput] = useState((initialLocation?.lng ?? 83.224887).toString());
+  const [addressInput, setAddressInput] = useState('');
   const [loadingGeolocation, setLoadingGeolocation] = useState(false);
+  const [isFetchingAddress, setIsFetchingAddress] = useState(false);
 
   useEffect(() => {
     if (initialLocation) {
@@ -69,9 +71,25 @@ export function StoreLocationPicker({ initialLocation, onLocationSelectAction }:
     [parsedLat, parsedLng]
   );
 
+  const fetchAddress = async (lat: number, lng: number) => {
+    setIsFetchingAddress(true);
+    try {
+      const res = await fetch(`/api/geo/reverse?lat=${lat}&lng=${lng}`);
+      const data = await res.json();
+      if (data.address) {
+        setAddressInput(data.address);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsFetchingAddress(false);
+    }
+  };
+
   const updatePosition = (location: { lat: number; lng: number }) => {
     setLatInput(location.lat.toString());
     setLngInput(location.lng.toString());
+    fetchAddress(location.lat, location.lng);
   };
 
   const handleUseMyLocation = () => {
@@ -105,8 +123,12 @@ export function StoreLocationPicker({ initialLocation, onLocationSelectAction }:
         <Input value={latInput} onChange={(event) => setLatInput(event.target.value)} placeholder="Latitude" />
         <Input value={lngInput} onChange={(event) => setLngInput(event.target.value)} placeholder="Longitude" />
       </div>
+      <div className="flex gap-2 items-center">
+        <Input value={addressInput} onChange={(e) => setAddressInput(e.target.value)} placeholder="Address (auto-filled on map pick)" />
+        {isFetchingAddress && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
+      </div>
 
-      <Button type="button" variant="secondary" onClick={() => onLocationSelectAction(position)}>
+      <Button type="button" variant="secondary" onClick={() => onLocationSelectAction({ ...position, address: addressInput })}>
         Save Location
       </Button>
 

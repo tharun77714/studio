@@ -165,19 +165,28 @@ export function BusinessNetworkView() {
     }
   };
 
-  const handleMapSelect = (location: { lat: number; lng: number }) => {
+  const handleMapSelect = (location: { lat: number; lng: number; address?: string }) => {
     if (mapDialogTarget === 'profile') {
       profileForm.setValue('business_address_lat', location.lat, { shouldValidate: true });
       profileForm.setValue('business_address_lng', location.lng, { shouldValidate: true });
+      if (location.address) {
+        profileForm.setValue('business_address_text', location.address, { shouldValidate: true });
+      }
     } else if (mapDialogTarget === 'branch') {
       branchForm.setValue('address_lat', location.lat, { shouldValidate: true });
       branchForm.setValue('address_lng', location.lng, { shouldValidate: true });
+      if (location.address) {
+        branchForm.setValue('address_text', location.address, { shouldValidate: true });
+      }
     }
   };
 
-  const handleBranchMapSelect = (location: { lat: number; lng: number }) => {
+  const handleBranchMapSelect = (location: { lat: number; lng: number; address?: string }) => {
     branchForm.setValue('address_lat', location.lat, { shouldValidate: true });
     branchForm.setValue('address_lng', location.lng, { shouldValidate: true });
+    if (location.address) {
+      branchForm.setValue('address_text', location.address, { shouldValidate: true });
+    }
   };
 
   async function onProfileSubmit(values: BusinessProfileFormValues) {

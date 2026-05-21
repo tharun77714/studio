@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Lock, MapPin, Phone, ArrowRight, Loader2, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { AddressAutocompleteInput } from '@/components/common/address-autocomplete-input'; // Assuming this component exists and is correctly implemented
 import dynamic from 'next/dynamic';
 import { PhoneInput } from '@/components/common/phone-input';
@@ -42,11 +43,16 @@ export default function IndividualSignUpPage() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  // Dynamically import AddressAutocompleteInput to ensure it's client-side only
   const DynamicAddressAutocompleteInput = dynamic(() =>
     import('@/components/common/address-autocomplete-input').then((mod) => mod.AddressAutocompleteInput),
     { ssr: false }
   );
+  
+  const StoreLocationPicker = dynamic(
+    () => import('@/components/networks/StoreLocationPicker').then((mod) => mod.StoreLocationPicker),
+    { ssr: false }
+  );
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
 
   const form = useForm<IndividualSignUpFormValues>({
     resolver: zodResolver(individualSignUpSchema),
@@ -173,16 +179,55 @@ export default function IndividualSignUpPage() {
                 )}
               />
             </div>
-            <FormItem>
+            <FormItem className="space-y-2">
               <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Address (Optional)</FormLabel>
               <DynamicAddressAutocompleteInput
                 onPlaceSelectedAction={handlePlaceSelected}
                 initialValue={form.getValues().defaultShippingAddressText}
                 placeholder="Search your shipping address"
               />
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsMapDialogOpen(true)}>
+                  Pick on map
+                </Button>
+                {form.watch('defaultShippingAddressLat') && form.watch('defaultShippingAddressLng') && (
+                  <span className="text-xs text-muted-foreground">Lat: {form.watch('defaultShippingAddressLat')}, Lng: {form.watch('defaultShippingAddressLng')}</span>
+                )}
+              </div>
               <FormField control={form.control} name="defaultShippingAddressText" render={({ field }) => <Input type="hidden" {...field} />} />
               <FormMessage>{form.formState.errors.defaultShippingAddressText?.message}</FormMessage>
             </FormItem>
+
+            <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Select Location</DialogTitle>
+                  <DialogDescription>Pick the exact location on the map and it will populate the address coordinates.</DialogDescription>
+                </DialogHeader>
+                {StoreLocationPicker && (
+                  <StoreLocationPicker
+                    initialLocation={
+                      form.watch('defaultShippingAddressLat') && form.watch('defaultShippingAddressLng')
+                        ? { lat: form.watch('defaultShippingAddressLat')!, lng: form.watch('defaultShippingAddressLng')! }
+                        : undefined
+                    }
+                    onLocationSelectAction={(location) => {
+                      form.setValue('defaultShippingAddressLat', location.lat, { shouldValidate: true });
+                      form.setValue('defaultShippingAddressLng', location.lng, { shouldValidate: true });
+                      if (location.address) {
+                        form.setValue('defaultShippingAddressText', location.address, { shouldValidate: true });
+                      }
+                      setIsMapDialogOpen(false);
+                    }}
+                  />
+                )}
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="ghost">Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <FormField
               control={form.control}
               name="individualPhoneNumber"

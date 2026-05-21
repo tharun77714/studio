@@ -267,6 +267,9 @@ export default function BusinessSignUpPage() {
               onLocationSelectAction={(location) => {
                 form.setValue('businessAddressLat', location.lat, { shouldValidate: true });
                 form.setValue('businessAddressLng', location.lng, { shouldValidate: true });
+                if (location.address) {
+                  form.setValue('businessAddressText', location.address, { shouldValidate: true });
+                }
                 setIsMapDialogOpen(false);
               }}
             />
