@@ -107,7 +107,7 @@ function SignInPageContent() {
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, expectedRole: 'individual' }),
       });
       const result = await response.json();
       if (!response.ok) {
@@ -174,7 +174,7 @@ function SignInPageContent() {
       const response = await fetch('/api/auth/phone/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, code: data.code }),
+        body: JSON.stringify({ phone: phoneNumber, code: data.code, expectedRole: 'individual' }),
       });
 
       const result = await response.json();
@@ -218,6 +218,7 @@ function SignInPageContent() {
         scope: 'openid email profile',
         access_type: 'offline',
         prompt: 'select_account',
+        state: 'individual',
       });
 
       window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

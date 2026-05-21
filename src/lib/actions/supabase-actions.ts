@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
 import { getDb } from '@/lib/mongodb';
 import { createSession, getSessionUser } from '@/lib/session';
+import { requireRole } from '@/lib/rbac';
 import type { Profile } from '@/contexts/AuthContext';
 
 function nowIso() {
@@ -197,7 +198,7 @@ type BusinessProfileUpdateData = Partial<
 
 export async function updateBusinessProfile(userId: string, updates: BusinessProfileUpdateData) {
   try {
-    const sessionUser = await requireAuthenticatedUser();
+    const sessionUser = await requireRole('business');
     if (sessionUser.id !== userId) {
       return { data: null, error: { message: 'Unauthorized profile update.' } };
     }
@@ -235,7 +236,7 @@ type IndividualProfileUpdateData = Partial<
 
 export async function updateIndividualProfile(userId: string, updates: IndividualProfileUpdateData) {
   try {
-    const sessionUser = await requireAuthenticatedUser();
+    const sessionUser = await requireRole('individual');
     if (sessionUser.id !== userId) {
       return { data: null, error: { message: 'Unauthorized profile update.' } };
     }
@@ -272,7 +273,7 @@ export interface StoreBranchData {
 
 export async function addStoreBranch(branchData: StoreBranchData) {
   try {
-    const sessionUser = await requireAuthenticatedUser();
+    const sessionUser = await requireRole('business');
     if (sessionUser.id !== branchData.business_id) {
       return { data: null, error: { message: 'Unauthorized branch insertion.' } };
     }

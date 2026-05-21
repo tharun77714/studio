@@ -45,7 +45,7 @@ export default function BusinessSignInPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, expectedRole: 'business' }),
       });
       const result = await response.json();
       if (!response.ok) {

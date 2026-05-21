@@ -68,6 +68,39 @@ export async function middleware(request: NextRequest) {
     if (isProfileCompleted && isOnboardingRoute) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
+
+    // 3. Strict RBAC Enforcement for Nested Routes
+    if (isProfileCompleted && pathname.startsWith('/dashboard')) {
+      const role = sessionPayload?.role;
+
+      const BUSINESS_ONLY_ROUTES = [
+        '/dashboard/store',
+        '/dashboard/products',
+        '/dashboard/orders',
+        '/dashboard/analytics',
+        '/dashboard/customers',
+        '/dashboard/business-settings'
+      ];
+
+      const INDIVIDUAL_ONLY_ROUTES = [
+        '/dashboard/customizer',
+        '/dashboard/my-orders',
+        '/dashboard/wishlist',
+        '/dashboard/profile',
+        '/dashboard/tryon'
+      ];
+
+      const isBusinessOnly = BUSINESS_ONLY_ROUTES.some(route => pathname.startsWith(route));
+      const isIndividualOnly = INDIVIDUAL_ONLY_ROUTES.some(route => pathname.startsWith(route));
+
+      if (role === 'individual' && isBusinessOnly) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+
+      if (role === 'business' && isIndividualOnly) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
   }
 
   return NextResponse.next();

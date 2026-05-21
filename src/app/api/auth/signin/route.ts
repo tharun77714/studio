@@ -5,7 +5,10 @@ import { getDb } from '@/lib/mongodb';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const user = await authDb.signInUser(body.email, body.password);
+    if (!body.expectedRole) {
+      return NextResponse.json({ error: 'expectedRole is required.' }, { status: 400 });
+    }
+    const user = await authDb.signInUser(body.email, body.password, body.expectedRole);
     
     // Fetch profile to return along with session to prevent client-side race conditions
     const db = await getDb();

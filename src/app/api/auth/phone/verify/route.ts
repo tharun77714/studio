@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
+import { auditLogCrossPortal, getRoleMismatchErrorMessage } from '@/lib/rbac';
 import { ObjectId } from 'mongodb';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    let { phone, code } = body;
+    let { phone, code, expectedRole } = body;
 
-    if (!phone || !code) {
-      return NextResponse.json({ error: 'Phone number and verification code are required.' }, { status: 400 });
+    if (!phone || !code || !expectedRole) {
+      return NextResponse.json({ error: 'Phone number, verification code, and expectedRole are required.' }, { status: 400 });
     }
 
     phone = phone.trim().replace(/\s+/g, '');
@@ -68,11 +69,16 @@ export async function POST(request: NextRequest) {
         await db.collection<any>('users').insertOne({
           _id: userId,
           email,
-          role: 'individual',
+          role: expectedRole,
           created_at: nowIso,
           updated_at: nowIso,
         });
-        userDoc = { _id: userId, email, role: 'individual' };
+        userDoc = { _id: userId, email, role: expectedRole };
+      } else {
+        if (userDoc.role !== expectedRole) {
+          await auditLogCrossPortal(phone, 'phone', expectedRole, userDoc.role);
+          return NextResponse.json({ error: getRoleMismatchErrorMessage(expectedRole) }, { status: 401 });
+        }
       }
     } else {
       // Profile not found! Let's check if there's a user record with mock phone email as failsafe
@@ -80,13 +86,18 @@ export async function POST(request: NextRequest) {
       userDoc = await db.collection<any>('users').findOne({ email: tempEmail });
 
       if (userDoc) {
+        if (userDoc.role !== expectedRole) {
+          await auditLogCrossPortal(phone, 'phone', expectedRole, userDoc.role);
+          return NextResponse.json({ error: getRoleMismatchErrorMessage(expectedRole) }, { status: 401 });
+        }
+
         userId = userDoc._id;
         email = userDoc.email;
         
         // Recover missing profile
         await db.collection<any>('profiles').insertOne({
           _id: userId,
-          role: 'individual',
+          role: expectedRole,
           email,
           full_name: `Phone Member ${phone.slice(-4)}`,
           default_shipping_address_text: '',
@@ -106,14 +117,14 @@ export async function POST(request: NextRequest) {
         await db.collection<any>('users').insertOne({
           _id: userId,
           email,
-          role: 'individual',
+          role: expectedRole,
           created_at: nowIso,
           updated_at: nowIso,
         });
 
         await db.collection<any>('profiles').insertOne({
           _id: userId,
-          role: 'individual',
+          role: expectedRole,
           email,
           full_name: `Phone Member ${phone.slice(-4)}`,
           default_shipping_address_text: '',

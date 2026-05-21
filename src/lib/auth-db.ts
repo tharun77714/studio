@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
 import { getDb } from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
+import { auditLogCrossPortal, getRoleMismatchErrorMessage } from '@/lib/rbac';
 
 function nowIso() {
   return new Date().toISOString();
@@ -64,6 +65,7 @@ export async function createBusinessUser(data: BusinessSignUpData) {
     business_address_lng: data.businessAddressLng ?? null,
     contact_person_name: data.contactPersonName,
     contact_phone_number: data.contactPhoneNumber,
+    profile_completed: true,
     created_at: createdAt,
     updated_at: createdAt,
   });
@@ -112,6 +114,7 @@ export async function createIndividualUser(data: IndividualSignUpData) {
     default_shipping_address_lat: data.defaultShippingAddressText ? (data.defaultShippingAddressLat ?? null) : null,
     default_shipping_address_lng: data.defaultShippingAddressText ? (data.defaultShippingAddressLng ?? null) : null,
     individual_phone_number: data.individualPhoneNumber,
+    profile_completed: true,
     created_at: createdAt,
     updated_at: createdAt,
   });
@@ -119,13 +122,18 @@ export async function createIndividualUser(data: IndividualSignUpData) {
   return { id: userId, email, role: 'individual' as const };
 }
 
-export async function signInUser(emailInput: string, password: string) {
+export async function signInUser(emailInput: string, password: string, expectedRole: string) {
   const db = await getDb();
   const email = emailInput.trim().toLowerCase();
   const user = await db.collection<any>('users').findOne({ email });
 
   if (!user) {
     throw new Error('Invalid email or password.');
+  }
+
+  if (user.role !== expectedRole) {
+    await auditLogCrossPortal(email, 'email', expectedRole, user.role);
+    throw new Error(getRoleMismatchErrorMessage(expectedRole));
   }
 
   let passwordMatches = false;
@@ -150,10 +158,13 @@ export async function signInUser(emailInput: string, password: string) {
     throw new Error('Invalid email or password.');
   }
 
+  const profile = await db.collection<any>('profiles').findOne({ _id: user._id });
+
   await createSession({
     id: user._id,
     email: user.email,
     role: user.role,
+    profileCompleted: profile?.profile_completed === true,
   });
 
   return { id: user._id, email: user.email, role: user.role };

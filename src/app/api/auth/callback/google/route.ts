@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
+import { auditLogCrossPortal, getRoleMismatchErrorMessage } from '@/lib/rbac';
 import { ObjectId } from 'mongodb';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
   const error = searchParams.get('error');
+  const state = searchParams.get('state') || 'individual';
 
   // Handle case where user cancelled or Google returned an error
   if (error) {
@@ -90,15 +92,15 @@ export async function GET(request: NextRequest) {
       await db.collection<any>('users').insertOne({
         _id: userId,
         email,
-        role: 'individual', // Default to individual customer
+        role: state, // Enforce the role they signed up through
         created_at: nowIso,
         updated_at: nowIso,
       });
 
-      // Initialize individual profile
+      // Initialize profile
       await db.collection<any>('profiles').insertOne({
         _id: userId,
-        role: 'individual',
+        role: state,
         email,
         full_name: name,
         default_shipping_address_text: '',
@@ -111,6 +113,13 @@ export async function GET(request: NextRequest) {
       });
       isProfileCompleted = false;
     } else {
+      // Role Mismatch Verification
+      if (user.role !== state) {
+        await auditLogCrossPortal(email, 'google', state, user.role);
+        const errorMessage = getRoleMismatchErrorMessage(state);
+        return NextResponse.redirect(new URL(`/auth/${state}/signin?error=${encodeURIComponent(errorMessage)}`, request.url));
+      }
+
       // Existing user: Ensure a profile document exists and has all keys safely initialized
       const profile = await db.collection<any>('profiles').findOne({ _id: userId });
       if (!profile) {
@@ -159,6 +168,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Google OAuth callback handler failed:', error);
     const errorMessage = error.message || 'An unexpected error occurred during Google sign in.';
-    return NextResponse.redirect(new URL(`/auth/individual/signin?error=${encodeURIComponent(errorMessage)}`, request.url));
+    const state = searchParams.get('state') || 'individual';
+    return NextResponse.redirect(new URL(`/auth/${state}/signin?error=${encodeURIComponent(errorMessage)}`, request.url));
   }
 }
