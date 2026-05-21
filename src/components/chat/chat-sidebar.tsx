@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, Send, XCircle, UploadCloud, ChevronLeft, Sparkles } from 'lucide-react';
+import { MessageSquare, Send, XCircle, UploadCloud, ChevronLeft, Sparkles, Mic, MicOff } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -28,8 +28,16 @@ export function ChatSidebar() {
   const [draft, setDraft] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.abort();
+    };
+  }, []);
 
 
 
@@ -45,6 +53,55 @@ export function ChatSidebar() {
     activeConversationTargetProfile?.full_name ||
     activeConversationTargetProfile?.email ||
     'Conversation';
+
+  const isSpeechSupported =
+    typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  const handleMicToggle = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    if (!isSpeechSupported) {
+      toast({ title: 'Speech not supported', description: 'Your browser does not support speech recognition.' });
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast({ title: 'Speech not supported', description: 'Speech recognition is unavailable.' });
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+      toast({ title: 'Recording', description: 'Listening...' });
+    };
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setDraft((prev) => (prev + ' ' + transcript).trim());
+    };
+    recognition.onerror = (event: any) => {
+      setIsRecording(false);
+      let errorMsg = event.error ?? 'Could not capture speech.';
+      if (event.error === 'network') {
+        errorMsg = 'Network error: Browsers like Brave strictly block speech recognition. Please try using Chrome or Edge.';
+      }
+      toast({ title: 'Speech error', description: errorMsg, variant: 'destructive' });
+    };
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
 
 
 
@@ -253,6 +310,21 @@ export function ChatSidebar() {
                   disabled={isSendingMessage}
                   className="flex-1 border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-0 text-foreground placeholder:text-muted-foreground/70"
                 />
+                
+                <button
+                  type="button"
+                  onClick={handleMicToggle}
+                  className={cn(
+                    "group flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition shadow-sm",
+                    isRecording 
+                      ? "bg-red-500 text-white animate-pulse" 
+                      : "bg-background/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                  )}
+                  disabled={!isSpeechSupported}
+                  aria-label="Record voice"
+                >
+                  {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4 transition-transform group-hover:scale-110" />}
+                </button>
                 
                 <Button
                   type="submit"

@@ -106,11 +106,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
     fetchMessages(activeConversationId);
   }, [activeConversationId, fetchMessages]);
-  useEffect(() => {
-    if (!activeConversationId && conversations.length > 0) {
-      setActiveConversationId(conversations[0].id);
-    }
-  }, [activeConversationId, conversations]);
+
 
   const value = useMemo<ChatContextType>(
     () => ({
