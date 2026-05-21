@@ -11,6 +11,7 @@ export interface SessionUser {
   id: string;
   email: string;
   role: 'individual' | 'business';
+  profileCompleted?: boolean;
 }
 
 export async function createSession(user: SessionUser) {
@@ -55,6 +56,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       id: payload.id,
       email: payload.email,
       role: payload.role,
+      profileCompleted: payload.profileCompleted,
     };
   } catch {
     return null;

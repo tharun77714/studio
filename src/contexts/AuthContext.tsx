@@ -28,6 +28,7 @@ export interface Profile {
   business_address_lng?: number | null;
   contact_person_name?: string;
   contact_phone_number?: string;
+  profile_completed?: boolean;
   updated_at?: string;
 }
 

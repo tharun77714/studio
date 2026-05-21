@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
           default_shipping_address_lat: null,
           default_shipping_address_lng: null,
           individual_phone_number: phone,
+          profile_completed: false,
           created_at: nowIso,
           updated_at: nowIso,
         });
@@ -119,6 +120,7 @@ export async function POST(request: NextRequest) {
           default_shipping_address_lat: null,
           default_shipping_address_lng: null,
           individual_phone_number: phone,
+          profile_completed: false,
           created_at: nowIso,
           updated_at: nowIso,
         });
@@ -146,6 +148,7 @@ export async function POST(request: NextRequest) {
       id: userId,
       email: email,
       role: (userDoc?.role || 'individual') as 'individual' | 'business',
+      profileCompleted: profile.profile_completed === true,
     };
 
     // 6. Generate the session cookie

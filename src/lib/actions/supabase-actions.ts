@@ -104,6 +104,7 @@ export async function signUpBusiness(data: BusinessSignUpData) {
     business_address_lng: data.businessAddressLng ?? null,
     contact_person_name: data.contactPersonName,
     contact_phone_number: data.contactPhoneNumber,
+    profile_completed: true,
     created_at: createdAt,
     updated_at: createdAt,
   });
@@ -152,6 +153,7 @@ export async function signUpIndividual(data: IndividualSignUpData) {
     default_shipping_address_lat: data.defaultShippingAddressText ? (data.defaultShippingAddressLat ?? null) : null,
     default_shipping_address_lng: data.defaultShippingAddressText ? (data.defaultShippingAddressLng ?? null) : null,
     individual_phone_number: data.individualPhoneNumber,
+    profile_completed: true,
     created_at: createdAt,
     updated_at: createdAt,
   });
@@ -542,10 +544,13 @@ export async function signInAndCreateSession(email: string, password: string) {
     return { error: { message: 'Invalid email or password.' } };
   }
 
+  const profile = await db.collection<any>('profiles').findOne({ _id: user._id });
+
   await createSession({
     id: user._id,
     email: user.email,
     role: user.role,
+    profileCompleted: profile?.profile_completed === true,
   });
 
   return { error: null };

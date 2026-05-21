@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
     const db = await getDb();
     let user = await db.collection<any>('users').findOne({ email });
     let userId = user?._id;
+    let isProfileCompleted = false;
 
     const nowIso = new Date().toISOString();
 
@@ -104,9 +105,11 @@ export async function GET(request: NextRequest) {
         default_shipping_address_lat: null,
         default_shipping_address_lng: null,
         individual_phone_number: '',
+        profile_completed: false,
         created_at: nowIso,
         updated_at: nowIso,
       });
+      isProfileCompleted = false;
     } else {
       // Existing user: Ensure a profile document exists and has all keys safely initialized
       const profile = await db.collection<any>('profiles').findOne({ _id: userId });
@@ -120,11 +123,14 @@ export async function GET(request: NextRequest) {
           default_shipping_address_lat: null,
           default_shipping_address_lng: null,
           individual_phone_number: '',
+          profile_completed: false,
           created_at: nowIso,
           updated_at: nowIso,
         });
+        isProfileCompleted = false;
       } else {
         // Safe-heal profile structure so the user doesn't hit edit blockages
+        isProfileCompleted = profile.profile_completed === true;
         const safeProfileUpdates: any = {};
         if (profile.default_shipping_address_text === undefined) safeProfileUpdates.default_shipping_address_text = '';
         if (profile.individual_phone_number === undefined) safeProfileUpdates.individual_phone_number = '';
@@ -144,6 +150,7 @@ export async function GET(request: NextRequest) {
       id: userId,
       email,
       role: user?.role || 'individual',
+      profileCompleted: isProfileCompleted,
     });
 
     // 5. Redirect to Dashboard
