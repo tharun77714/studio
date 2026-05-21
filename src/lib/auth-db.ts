@@ -13,7 +13,7 @@ export interface BusinessSignUpData {
   email: string;
   password: string;
   gstNumber: string;
-  businessType: string;
+  businessType?: string;
   businessAddressText: string;
   businessAddressLat?: number;
   businessAddressLng?: number;
@@ -59,7 +59,7 @@ export async function createBusinessUser(data: BusinessSignUpData) {
     email,
     business_name: data.businessName,
     gst_number: data.gstNumber,
-    business_type: data.businessType,
+    business_type: data.businessType || '',
     business_address_text: data.businessAddressText,
     business_address_lat: data.businessAddressLat ?? null,
     business_address_lng: data.businessAddressLng ?? null,

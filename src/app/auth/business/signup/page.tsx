@@ -23,7 +23,6 @@ const businessSignUpSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters."),
   confirmPassword: z.string(),
   gstNumber: z.string().min(15, "GST number must be 15 characters.").max(15, "GST number must be 15 characters.").regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, "Invalid GST number format."),
-  businessType: z.string().min(3, "Please select a business type."),
   businessAddressText: z.string().min(10, "Business address is required."),
   businessAddressLat: z.number().optional(),
   businessAddressLng: z.number().optional(),
@@ -36,7 +35,7 @@ const businessSignUpSchema = z.object({
 
 type BusinessSignUpFormValues = z.infer<typeof businessSignUpSchema>;
 
-const businessTypes = ["Retailer", "Wholesaler", "Artisan/Designer", "Manufacturer", "Online Store", "Other"];
+
 
 export default function BusinessSignUpPage() {
   const router = useRouter();
@@ -64,7 +63,7 @@ export default function BusinessSignUpPage() {
       password: "",
       confirmPassword: "",
       gstNumber: "",
-      businessType: "",
+
       businessAddressText: "",
       contactPersonName: "",
       contactPhoneNumber: "",
@@ -228,28 +227,7 @@ export default function BusinessSignUpPage() {
                 </FormItem>
               )}
             />
-             <FormField
-              control={form.control}
-              name="businessType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center"><Briefcase className="mr-2 h-4 w-4" />Business Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select business type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {businessTypes.map(type => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
       <FormItem className="space-y-2">
         <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Business Address</FormLabel>
         <DynamicAddressAutocompleteInput
