@@ -45,7 +45,7 @@ export function AddressAutocompleteInput({
       }
 
       const trimmed = query.trim();
-      if (trimmed.length < 2) {
+      if (trimmed.length < 1) {
         setSuggestions([]);
         setIsOpen(false);
         return;
