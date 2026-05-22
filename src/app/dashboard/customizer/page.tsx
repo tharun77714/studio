@@ -330,7 +330,7 @@ export default function CustomizerPage() {
         throw new Error(result?.error || "Image generation failed.");
       }
 
-      const imageUrl = result?.image;
+      const imageUrl = result?.image || result?.dataUri;
       if (!imageUrl) {
         throw new Error("Image generation did not return an image.");
       }
@@ -415,7 +415,11 @@ export default function CustomizerPage() {
   };
 
   const handleSaveModel = async () => {
-    if (!customizedImageDataUri || !user) return;
+    if (!customizedImageDataUri) return;
+    if (!user) {
+      toast({ title: 'Sign In Required', description: 'Please sign in to save your design models.', variant: 'destructive' });
+      return;
+    }
     try {
       const { error } = await saveDesignAction({
         user_id: user.id,
@@ -740,7 +744,7 @@ export default function CustomizerPage() {
                         <Eye className="mr-2 h-4 w-4" /> Editorial Details
                       </Button>
                       <Button onClick={handleSaveModel} variant="default" className="flex-grow bg-primary text-black hover:bg-primary/90 transition-shadow hover:shadow-lg hover:shadow-primary/10">
-                        Archive Model
+                        Save Model
                       </Button>
                     </div>
                   </div>

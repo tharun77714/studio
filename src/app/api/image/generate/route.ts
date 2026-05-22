@@ -10,43 +10,98 @@ export async function POST(request: Request) {
     }
 
     const constrainedPrompt =
-      `Create a high-quality studio product photo of a jewelry item. ` +
-      `The subject must be jewelry only (ring, necklace, earrings, bracelet, pendant, brooch, or anklet). ` +
+      `A photorealistic, highly detailed studio product shot of jewelry. ` +
       `No people, faces, animals, scenery, buildings, or text. ` +
       `Use a clean background and product lighting. ` +
       `User request: ${prompt}`;
+
+    const imageDataUri: string | undefined = body?.imageDataUri;
+    const imageBase64 =
+      imageDataUri && imageDataUri.startsWith('data:')
+        ? imageDataUri.substring(imageDataUri.indexOf(',') + 1)
+        : undefined;
+
+    const useImageToImage = Boolean(imageBase64);
+
+    let response: Response;
+
+    if (useImageToImage) {
+      // Image-to-Image editing using Hugging Face (Instruct-Pix2Pix)
+      const token = process.env.HF_API_KEY;
+      if (!token) {
+        return NextResponse.json({ error: 'HF_API_KEY is missing in environment variables.' }, { status: 500 });
+      }
+
+      const modelName = 'timbrooks/instruct-pix2pix';
+      const url = `https://api-inference.huggingface.co/models/${modelName}`;
       
-    const seed = Math.floor(Math.random() * 1000000000);
-    // Pollinations generates an image just by hitting a URL. It requires no API key!
-    const width = 1024;
-    const height = 1024;
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(constrainedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
+      const payload = {
+        inputs: imageBase64,
+        parameters: {
+          prompt: constrainedPrompt,
+          negative_prompt: 'people, faces, hands, animals, scenery, buildings, text, watermarks, logos',
+        },
+      };
 
-    const response = await fetch(pollinationsUrl);
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-Wait-For-Model': 'true',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json(
-        { error: `Generation error (${response.status}): ${errorText}` },
-        { status: response.status }
-      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        return NextResponse.json(
+          { error: `Hugging Face error (${response.status}): ${errorText}` },
+          { status: response.status }
+        );
+      }
+    } else {
+      // Text-to-Image generation using Pollinations AI
+      const seed = Math.floor(Math.random() * 1000000000);
+      const width = 1024;
+      const height = 1024;
+      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(constrainedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
+
+      response = await fetch(pollinationsUrl);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return NextResponse.json(
+          { error: `Pollinations error (${response.status}): ${errorText}` },
+          { status: response.status }
+        );
+      }
     }
 
     const contentType = response.headers.get('content-type') || '';
     if (!contentType.startsWith('image/')) {
-      return NextResponse.json({ error: `Unexpected response content-type: ${contentType}` }, { status: 500 });
+      const errorText = await response.text();
+      return NextResponse.json({ error: `Unexpected response content-type: ${contentType} - ${errorText}` }, { status: 500 });
     }
 
     const buffer = await response.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
-    const dataUrl = `data:${contentType};base64,${base64}`;
+    const mimeType = contentType || 'image/jpeg';
+    const dataUri = `data:${mimeType};base64,${base64}`;
 
-    return NextResponse.json({ image: dataUrl });
-  } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Image generation failed.' },
+      { dataUri },
+      {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
+  } catch (error: any) {
+    console.error('Image generation error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Unknown error occurred' },
       { status: 500 }
     );
   }
 }
-
