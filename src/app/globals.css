@@ -127,3 +127,14 @@
     left: 150%;
   }
 }
+
+/* Phone Input Country Dropdown Fix for Dark Mode */
+.PhoneInputCountrySelect {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.PhoneInputCountrySelect option {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
