@@ -74,7 +74,6 @@ export async function middleware(request: NextRequest) {
       const role = sessionPayload?.role;
 
       const BUSINESS_ONLY_ROUTES = [
-        '/dashboard/store',
         '/dashboard/products',
         '/dashboard/orders',
         '/dashboard/analytics',
