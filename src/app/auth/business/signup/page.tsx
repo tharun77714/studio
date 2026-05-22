@@ -28,6 +28,7 @@ const businessSignUpSchema = z.object({
   businessAddressText: z.string().min(10, "Business address is required."),
   businessAddressLat: z.number().optional(),
   businessAddressLng: z.number().optional(),
+  businessPincode: z.string().min(1, "Pincode is required."),
   contactPersonName: z.string().min(2, "Contact person name is required."),
   contactPhoneNumber: z.string().refine((val) => isValidPhoneNumber(val), {
     message: "Invalid phone number.",
@@ -70,16 +71,20 @@ export default function BusinessSignUpPage() {
       gstNumber: "",
 
       businessAddressText: "",
+      businessPincode: "",
       contactPersonName: "",
       contactPhoneNumber: "",
     },
   });
 
-  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number } | null) => {
+  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number; pincode?: string } | null) => {
     if (placeDetails) {
       form.setValue('businessAddressText', placeDetails.address, { shouldValidate: true });
       form.setValue('businessAddressLat', placeDetails.latitude, { shouldValidate: true });
       form.setValue('businessAddressLng', placeDetails.longitude, { shouldValidate: true });
+      if (placeDetails.pincode) {
+        form.setValue('businessPincode', placeDetails.pincode, { shouldValidate: true });
+      }
     }
   };
 
@@ -251,6 +256,19 @@ export default function BusinessSignUpPage() {
         <FormField control={form.control} name="businessAddressText" render={({ field }) => <Input type="hidden" {...field} />} />
         <FormMessage>{form.formState.errors.businessAddressText?.message}</FormMessage>
       </FormItem>
+      <FormField
+        control={form.control}
+        name="businessPincode"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Pincode</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter your pincode" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
         <DialogContent>

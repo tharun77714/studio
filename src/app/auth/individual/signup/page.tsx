@@ -26,6 +26,7 @@ const individualSignUpSchema = z.object({
   defaultShippingAddressText: z.string().optional(),
   defaultShippingAddressLat: z.number().optional(),
   defaultShippingAddressLng: z.number().optional(),
+  defaultShippingAddressPincode: z.string().optional(),
   individualPhoneNumber: z.string().refine((val) => isValidPhoneNumber(val), {
     message: "Invalid phone number.",
   }),
@@ -64,6 +65,7 @@ export default function IndividualSignUpPage() {
       password: "",
       confirmPassword: "",
       defaultShippingAddressText: "",
+      defaultShippingAddressPincode: "",
       individualPhoneNumber: "",
     },
   });
@@ -72,11 +74,14 @@ export default function IndividualSignUpPage() {
     setShowPassword(!showPassword);
   };
 
-  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number } | null) => {
+  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number; pincode?: string } | null) => {
     if (placeDetails) {
       form.setValue('defaultShippingAddressText', placeDetails.address, { shouldValidate: true });
       form.setValue('defaultShippingAddressLat', placeDetails.latitude, { shouldValidate: true });
       form.setValue('defaultShippingAddressLng', placeDetails.longitude, { shouldValidate: true });
+      if (placeDetails.pincode) {
+        form.setValue('defaultShippingAddressPincode', placeDetails.pincode, { shouldValidate: true });
+      }
     }
   };
 
@@ -199,6 +204,19 @@ export default function IndividualSignUpPage() {
               <FormField control={form.control} name="defaultShippingAddressText" render={({ field }) => <Input type="hidden" {...field} />} />
               <FormMessage>{form.formState.errors.defaultShippingAddressText?.message}</FormMessage>
             </FormItem>
+            <FormField
+              control={form.control}
+              name="defaultShippingAddressPincode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Pincode (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your pincode" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
               <DialogContent>

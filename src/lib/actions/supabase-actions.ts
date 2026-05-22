@@ -57,6 +57,7 @@ interface BusinessSignUpData {
   businessAddressText: string;
   businessAddressLat?: number;
   businessAddressLng?: number;
+  businessPincode: string;
   contactPersonName: string;
   contactPhoneNumber: string;
 }
@@ -68,6 +69,7 @@ interface IndividualSignUpData {
   defaultShippingAddressText?: string;
   defaultShippingAddressLat?: number;
   defaultShippingAddressLng?: number;
+  defaultShippingAddressPincode?: string;
   individualPhoneNumber: string;
 }
 
@@ -103,6 +105,7 @@ export async function signUpBusiness(data: BusinessSignUpData) {
     business_address_text: data.businessAddressText,
     business_address_lat: data.businessAddressLat ?? null,
     business_address_lng: data.businessAddressLng ?? null,
+    business_pincode: data.businessPincode,
     contact_person_name: data.contactPersonName,
     contact_phone_number: data.contactPhoneNumber,
     profile_completed: true,
@@ -116,6 +119,7 @@ export async function signUpBusiness(data: BusinessSignUpData) {
     address_text: data.businessAddressText,
     address_lat: data.businessAddressLat ?? null,
     address_lng: data.businessAddressLng ?? null,
+    pincode: data.businessPincode,
     created_at: createdAt,
     updated_at: createdAt,
   });
@@ -153,6 +157,7 @@ export async function signUpIndividual(data: IndividualSignUpData) {
     default_shipping_address_text: data.defaultShippingAddressText || '',
     default_shipping_address_lat: data.defaultShippingAddressText ? (data.defaultShippingAddressLat ?? null) : null,
     default_shipping_address_lng: data.defaultShippingAddressText ? (data.defaultShippingAddressLng ?? null) : null,
+    default_shipping_address_pincode: data.defaultShippingAddressPincode || '',
     individual_phone_number: data.individualPhoneNumber,
     profile_completed: true,
     created_at: createdAt,
@@ -269,6 +274,7 @@ export interface StoreBranchData {
   address_text: string;
   address_lat: number;
   address_lng: number;
+  pincode: string;
 }
 
 export async function addStoreBranch(branchData: StoreBranchData) {

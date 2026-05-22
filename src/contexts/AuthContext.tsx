@@ -19,6 +19,7 @@ export interface Profile {
   default_shipping_address_text?: string;
   default_shipping_address_lat?: number | null;
   default_shipping_address_lng?: number | null;
+  default_shipping_address_pincode?: string;
   individual_phone_number?: string;
   business_name?: string;
   gst_number?: string;
@@ -26,6 +27,7 @@ export interface Profile {
   business_address_text?: string;
   business_address_lat?: number | null;
   business_address_lng?: number | null;
+  business_pincode?: string;
   contact_person_name?: string;
   contact_phone_number?: string;
   profile_completed?: boolean;

@@ -37,6 +37,7 @@ const individualSchema = z.object({
   defaultShippingAddressText: z.string().optional(),
   defaultShippingAddressLat: z.number().optional(),
   defaultShippingAddressLng: z.number().optional(),
+  defaultShippingAddressPincode: z.string().optional(),
 });
 
 const businessSchema = z.object({
@@ -47,6 +48,7 @@ const businessSchema = z.object({
   businessAddressText: z.string().min(10, "Business address is required."),
   businessAddressLat: z.number().optional(),
   businessAddressLng: z.number().optional(),
+  businessPincode: z.string().min(1, "Pincode is required."),
   contactPersonName: z.string().min(2, "Contact person name is required."),
   contactPhoneNumber: z.string().refine((val) => isValidPhoneNumber(val), {
     message: "Invalid phone number.",
@@ -67,14 +69,18 @@ function IndividualOnboardingForm({ profile, onSuccess }: { profile: any, onSucc
       defaultShippingAddressText: profile?.default_shipping_address_text || '',
       defaultShippingAddressLat: profile?.default_shipping_address_lat || undefined,
       defaultShippingAddressLng: profile?.default_shipping_address_lng || undefined,
+      defaultShippingAddressPincode: profile?.default_shipping_address_pincode || '',
     },
   });
 
-  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number } | null) => {
+  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number; pincode?: string } | null) => {
     if (placeDetails) {
       form.setValue('defaultShippingAddressText', placeDetails.address, { shouldValidate: true });
       form.setValue('defaultShippingAddressLat', placeDetails.latitude, { shouldValidate: true });
       form.setValue('defaultShippingAddressLng', placeDetails.longitude, { shouldValidate: true });
+      if (placeDetails.pincode) {
+        form.setValue('defaultShippingAddressPincode', placeDetails.pincode, { shouldValidate: true });
+      }
     }
   };
 
@@ -117,6 +123,11 @@ function IndividualOnboardingForm({ profile, onSuccess }: { profile: any, onSucc
           <FormField control={form.control} name="defaultShippingAddressText" render={({ field }) => <Input type="hidden" {...field} />} />
           <FormMessage>{form.formState.errors.defaultShippingAddressText?.message}</FormMessage>
         </FormItem>
+        <FormField control={form.control} name="defaultShippingAddressPincode" render={({ field }) => (
+          <FormItem><FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Pincode (Optional)</FormLabel>
+            <FormControl><Input placeholder="Enter your pincode" {...field} /></FormControl><FormMessage />
+          </FormItem>
+        )} />
         <Button type="submit" className="w-full btn-accent-sparkle text-lg py-3 mt-6" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <ArrowRight className="mr-2 h-5 w-5" />}
           Continue to Dashboard
@@ -139,16 +150,20 @@ function BusinessOnboardingForm({ profile, onSuccess }: { profile: any, onSucces
       gstNumber: profile?.gst_number || "",
       businessType: profile?.business_type || "",
       businessAddressText: profile?.business_address_text || "",
+      businessPincode: profile?.business_pincode || "",
       contactPersonName: profile?.contact_person_name || "",
       contactPhoneNumber: profile?.contact_phone_number || "",
     },
   });
 
-  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number } | null) => {
+  const handlePlaceSelected = (placeDetails: { address: string; latitude: number; longitude: number; pincode?: string } | null) => {
     if (placeDetails) {
       form.setValue('businessAddressText', placeDetails.address, { shouldValidate: true });
       form.setValue('businessAddressLat', placeDetails.latitude, { shouldValidate: true });
       form.setValue('businessAddressLng', placeDetails.longitude, { shouldValidate: true });
+      if (placeDetails.pincode) {
+        form.setValue('businessPincode', placeDetails.pincode, { shouldValidate: true });
+      }
     }
   };
 
@@ -204,6 +219,11 @@ function BusinessOnboardingForm({ profile, onSuccess }: { profile: any, onSucces
           <FormField control={form.control} name="businessAddressText" render={({ field }) => <Input type="hidden" {...field} />} />
           <FormMessage>{form.formState.errors.businessAddressText?.message}</FormMessage>
         </FormItem>
+        <FormField control={form.control} name="businessPincode" render={({ field }) => (
+          <FormItem><FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Pincode</FormLabel>
+            <FormControl><Input placeholder="Enter your pincode" {...field} /></FormControl><FormMessage />
+          </FormItem>
+        )} />
         
         <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
           <DialogContent>

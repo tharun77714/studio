@@ -9,6 +9,7 @@ interface AddressSuggestion {
   address: string;
   latitude: number;
   longitude: number;
+  pincode?: string;
 }
 
 interface AddressAutocompleteInputProps {
