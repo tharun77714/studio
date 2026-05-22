@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     // Pollinations generates an image just by hitting a URL. It requires no API key!
     const width = 1024;
     const height = 1024;
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(constrainedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(constrainedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
 
     const response = await fetch(pollinationsUrl);
 
