@@ -39,6 +39,7 @@ const NO_CHANGE_VALUE = "no-change";
 interface HistoryItem {
   imageUrl: string;
   description: string;
+  seed?: number;
 }
 
 declare global {
@@ -67,6 +68,7 @@ export default function CustomizerPage() {
   const [manualEngraving, setManualEngraving] = useState<string>("");
 
   const [customizedImageDataUri, setCustomizedImageDataUri] = useState<string | null>(null);
+  const [currentSeed, setCurrentSeed] = useState<number | null>(null);
   const [imageHistory, setImageHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isEnhancingPrompt, setIsEnhancingPrompt] = useState<boolean>(false); // New state for prompt enhancement
@@ -322,6 +324,7 @@ export default function CustomizerPage() {
         body: JSON.stringify({
           prompt: promptText,
           imageDataUri: baseImageDataUri || undefined,
+          seed: baseImageDataUri && currentSeed ? currentSeed : undefined,
         }),
       });
 
@@ -337,11 +340,13 @@ export default function CustomizerPage() {
 
       const newHistoryItem: HistoryItem = { 
         imageUrl: imageUrl, 
-        description: finalCustomizationDescription || (baseImageDataUri ? "Subtle refinement" : "New design from empty prompt") 
+        description: finalCustomizationDescription || (baseImageDataUri ? "Subtle refinement" : "New design from empty prompt"),
+        seed: result?.seed
       };
 
       setCustomizedImageDataUri(imageUrl);
       setBaseImageDataUri(imageUrl); 
+      if (result?.seed) setCurrentSeed(result.seed);
       setBaseImageFile(null); 
 
       setImageHistory(prevHistory => {
@@ -366,6 +371,7 @@ export default function CustomizerPage() {
   const handleHistoryImageSelect = (historyItem: HistoryItem) => {
     setCustomizedImageDataUri(historyItem.imageUrl); 
     setBaseImageDataUri(historyItem.imageUrl); 
+    if (historyItem.seed) setCurrentSeed(historyItem.seed);
     setBaseImageFile(null);
     clearCustomizationInputs(); 
   };

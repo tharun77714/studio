@@ -17,67 +17,20 @@ export async function POST(request: Request) {
       `Use a clean background and product lighting. ` +
       `User request: ${prompt}`;
 
-    const imageDataUri: string | undefined = body?.imageDataUri;
-    const imageBase64 =
-      imageDataUri && imageDataUri.startsWith('data:')
-        ? imageDataUri.substring(imageDataUri.indexOf(',') + 1)
-        : undefined;
+    const passedSeed = body?.seed;
+    const seed = passedSeed ? Number(passedSeed) : Math.floor(Math.random() * 1000000000);
+    const width = 1024;
+    const height = 1024;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(constrainedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
 
-    const useImageToImage = Boolean(imageBase64);
+    const response = await fetch(pollinationsUrl);
 
-    let response: Response;
-
-    if (useImageToImage) {
-      // Image-to-Image editing using Hugging Face (Instruct-Pix2Pix)
-      const token = process.env.HF_API_KEY;
-      if (!token) {
-        return NextResponse.json({ error: 'HF_API_KEY is missing in environment variables.' }, { status: 500 });
-      }
-
-      const modelName = 'timbrooks/instruct-pix2pix';
-      const url = `https://api-inference.huggingface.co/models/${modelName}`;
-      
-      const payload = {
-        inputs: imageBase64,
-        parameters: {
-          prompt: constrainedPrompt,
-          negative_prompt: 'people, faces, hands, animals, scenery, buildings, text, watermarks, logos',
-        },
-      };
-
-      response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-Wait-For-Model': 'true',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        return NextResponse.json(
-          { error: `Hugging Face error (${response.status}): ${errorText}` },
-          { status: response.status }
-        );
-      }
-    } else {
-      // Text-to-Image generation using Pollinations AI
-      const seed = Math.floor(Math.random() * 1000000000);
-      const width = 1024;
-      const height = 1024;
-      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(constrainedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
-
-      response = await fetch(pollinationsUrl);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        return NextResponse.json(
-          { error: `Pollinations error (${response.status}): ${errorText}` },
-          { status: response.status }
-        );
-      }
+    if (!response.ok) {
+      const errorText = await response.text();
+      return NextResponse.json(
+        { error: `Pollinations error (${response.status}): ${errorText}` },
+        { status: response.status }
+      );
     }
 
     const contentType = response.headers.get('content-type') || '';
@@ -92,7 +45,7 @@ export async function POST(request: Request) {
     const dataUri = `data:${mimeType};base64,${base64}`;
 
     return NextResponse.json(
-      { dataUri },
+      { dataUri, seed },
       {
         headers: {
           'Cache-Control': 'no-store, max-age=0',
