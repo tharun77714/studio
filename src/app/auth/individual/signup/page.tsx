@@ -36,6 +36,16 @@ const individualSignUpSchema = z.object({
 
 type IndividualSignUpFormValues = z.infer<typeof individualSignUpSchema>;
 
+const DynamicAddressAutocompleteInput = dynamic(() =>
+  import('@/components/common/address-autocomplete-input').then((mod) => mod.AddressAutocompleteInput),
+  { ssr: false }
+);
+
+const StoreLocationPicker = dynamic(
+  () => import('@/components/networks/StoreLocationPicker').then((mod) => mod.StoreLocationPicker),
+  { ssr: false }
+);
+
 export default function IndividualSignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -43,15 +53,7 @@ export default function IndividualSignUpPage() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const DynamicAddressAutocompleteInput = dynamic(() =>
-    import('@/components/common/address-autocomplete-input').then((mod) => mod.AddressAutocompleteInput),
-    { ssr: false }
-  );
-  
-  const StoreLocationPicker = dynamic(
-    () => import('@/components/networks/StoreLocationPicker').then((mod) => mod.StoreLocationPicker),
-    { ssr: false }
-  );
+
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
 
   const form = useForm<IndividualSignUpFormValues>({

@@ -39,7 +39,15 @@ const businessSignUpSchema = z.object({
 
 type BusinessSignUpFormValues = z.infer<typeof businessSignUpSchema>;
 
+const DynamicAddressAutocompleteInput = dynamic(() =>
+  import('@/components/common/address-autocomplete-input').then((mod) => mod.AddressAutocompleteInput),
+  { ssr: false }
+);
 
+const StoreLocationPicker = dynamic(
+  () => import('@/components/networks/StoreLocationPicker').then((mod) => mod.StoreLocationPicker),
+  { ssr: false }
+);
 
 export default function BusinessSignUpPage() {
   const router = useRouter();
@@ -49,14 +57,7 @@ export default function BusinessSignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const DynamicAddressAutocompleteInput = dynamic(() =>
-    import('@/components/common/address-autocomplete-input').then((mod) => mod.AddressAutocompleteInput),
-    { ssr: false }
-  );
-  const StoreLocationPicker = dynamic(
-    () => import('@/components/networks/StoreLocationPicker').then((mod) => mod.StoreLocationPicker),
-    { ssr: false }
-  );
+
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
 
   const form = useForm<BusinessSignUpFormValues>({
