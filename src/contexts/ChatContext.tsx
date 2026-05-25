@@ -36,7 +36,7 @@ interface ChatContextType {
   isLoadingConversations: boolean;
   isLoadingMessages: boolean;
   sendMessage: (content: string, type?: 'text' | 'image') => Promise<void>;
-  fetchConversations: () => Promise<void>;
+  fetchConversations: (silent?: boolean) => Promise<void>;
   activeConversationTargetProfile: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email' | 'last_seen' | 'is_online'> | null;
 }
 
@@ -56,22 +56,22 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
-  const fetchConversations = useCallback(async () => {
+  const fetchConversations = useCallback(async (silent = false) => {
     if (!user) return;
-    setIsLoadingConversations(true);
+    if (!silent) setIsLoadingConversations(true);
     const result = await listUserConversationsAction();
     if (result.error) {
       toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
     } else if (result.data) {
       setConversations(result.data);
     }
-    setIsLoadingConversations(false);
+    if (!silent) setIsLoadingConversations(false);
   }, [toast, user]);
 
   const fetchMessages = useCallback(
-    async (conversationId: string) => {
+    async (conversationId: string, silent = false) => {
       if (!user) return;
-      setIsLoadingMessages(true);
+      if (!silent) setIsLoadingMessages(true);
       const result = await getMessagesForConversationAction(conversationId);
       if (result.error) {
         toast({ title: 'Chat error', description: result.error.message, variant: 'destructive' });
@@ -79,7 +79,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setMessages(result.data);
       }
       await markMessagesAsReadAction(conversationId);
-      setIsLoadingMessages(false);
+      if (!silent) setIsLoadingMessages(false);
     },
     [toast, user]
   );
@@ -113,9 +113,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     // Polling for messages and conversations
     const pollInterval = setInterval(() => {
-      fetchConversations();
+      fetchConversations(true);
       if (activeConversationId) {
-        fetchMessages(activeConversationId);
+        fetchMessages(activeConversationId, true);
       }
     }, 5000); // Poll every 5 seconds
 

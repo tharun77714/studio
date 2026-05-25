@@ -253,8 +253,6 @@ export async function markMessagesAsReadAction(conversationId: string): Promise<
       .collection<any>('messages')
       .updateMany({ conversation_id: conversationId, receiver_id: sessionUser.id, is_read: false }, { $set: { is_read: true } });
 
-    revalidatePath('/', 'layout');
-
     return { data: true, error: null };
   } catch (error) {
     return { data: null, error: { message: error instanceof Error ? error.message : 'Failed to mark messages as read.' } };
