@@ -19,6 +19,7 @@ import {
   listUserConversationsAction,
   markMessagesAsReadAction,
   sendMessageAction,
+  updateLastSeenAction,
 } from '@/lib/actions/chat-actions';
 
 interface ChatContextType {
@@ -36,7 +37,7 @@ interface ChatContextType {
   isLoadingMessages: boolean;
   sendMessage: (content: string, type?: 'text' | 'image') => Promise<void>;
   fetchConversations: () => Promise<void>;
-  activeConversationTargetProfile: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email'> | null;
+  activeConversationTargetProfile: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email' | 'last_seen' | 'is_online'> | null;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -48,7 +49,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isChatMaximized, setIsChatMaximized] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [activeConversationTargetProfile, setActiveConversationTargetProfile] = useState<
-    Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email'> | null
+    Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email' | 'last_seen' | 'is_online'> | null
   >(null);
   const [conversations, setConversations] = useState<ConversationView[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -106,6 +107,30 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
     fetchMessages(activeConversationId);
   }, [activeConversationId, fetchMessages]);
+
+  useEffect(() => {
+    if (!user || !isChatOpen) return;
+
+    // Polling for messages and conversations
+    const pollInterval = setInterval(() => {
+      fetchConversations();
+      if (activeConversationId) {
+        fetchMessages(activeConversationId);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    // Polling for presence
+    const presenceInterval = setInterval(() => {
+      updateLastSeenAction();
+    }, 30000); // Update presence every 30 seconds
+
+    updateLastSeenAction(); // Initial call
+
+    return () => {
+      clearInterval(pollInterval);
+      clearInterval(presenceInterval);
+    };
+  }, [user, isChatOpen, activeConversationId, fetchConversations, fetchMessages]);
 
 
   const value = useMemo<ChatContextType>(

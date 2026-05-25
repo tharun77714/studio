@@ -20,12 +20,12 @@ export interface Message {
   created_at: string; // ISO Date string
   is_read: boolean;
   // Populated client-side or via join for display
-  sender?: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role'>;
+  sender?: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'last_seen' | 'is_online'>;
 }
 
 // For displaying a list of conversations in the sidebar
 // Includes details of the OTHER participant
 export interface ConversationView extends Conversation {
-  otherParticipant: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email'>;
+  otherParticipant: Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email' | 'last_seen' | 'is_online'>;
   unread_count: number; // Calculated or fetched
 }

@@ -13,13 +13,16 @@ const nowIso = () => new Date().toISOString();
 
 function mapProfile(profile: any) {
   if (!profile) return null;
+  const isOnline = profile.last_seen ? new Date(profile.last_seen).getTime() > Date.now() - 60000 : false;
   return {
     id: String(profile._id),
     full_name: profile.full_name,
     business_name: profile.business_name,
     role: profile.role,
     email: profile.email,
-  } as Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email'>;
+    last_seen: profile.last_seen,
+    is_online: isOnline,
+  } as Pick<Profile, 'id' | 'full_name' | 'business_name' | 'role' | 'email' | 'last_seen' | 'is_online'>;
 }
 
 async function requireSessionUser() {
@@ -255,5 +258,15 @@ export async function markMessagesAsReadAction(conversationId: string): Promise<
     return { data: true, error: null };
   } catch (error) {
     return { data: null, error: { message: error instanceof Error ? error.message : 'Failed to mark messages as read.' } };
+  }
+}
+
+export async function updateLastSeenAction(): Promise<void> {
+  try {
+    const sessionUser = await requireSessionUser();
+    const db = await getDb();
+    await db.collection<any>('profiles').updateOne({ _id: sessionUser.id }, { $set: { last_seen: nowIso() } });
+  } catch (error) {
+    // Silently fail, it's just a presence update
   }
 }

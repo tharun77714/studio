@@ -32,6 +32,8 @@ export interface Profile {
   contact_phone_number?: string;
   profile_completed?: boolean;
   updated_at?: string;
+  last_seen?: string;
+  is_online?: boolean;
 }
 
 interface AuthContextType {

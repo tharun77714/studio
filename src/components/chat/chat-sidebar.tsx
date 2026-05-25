@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, Send, XCircle, UploadCloud, ChevronLeft, Sparkles, Mic, MicOff } from 'lucide-react';
+import { MessageSquare, Send, XCircle, UploadCloud, ChevronLeft, Sparkles, Mic, MicOff, CheckCheck } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -168,8 +168,11 @@ export function ChatSidebar() {
           ) : (
             <Sparkles className="h-5 w-5 text-primary/80" />
           )}
-          <CardTitle className="flex items-center text-lg font-medium text-white tracking-wide">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-white tracking-wide">
             {activeConversationId ? activeDisplayName : 'Sparkle Assistant'}
+            {activeConversationId && activeConversationTargetProfile?.is_online && (
+              <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" title="Online" />
+            )}
           </CardTitle>
         </div>
         <Button variant="ghost" size="icon" onClick={closeChat} className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors">
@@ -206,9 +209,14 @@ export function ChatSidebar() {
                     className="w-full rounded-2xl px-5 py-4 text-left text-sm transition-all duration-500 ease-[cubic-bezier(0.25,1,0.25,1)] group flex flex-col gap-2 border border-white/5 bg-white/[0.02] backdrop-blur-md hover:bg-white/5 hover:border-white/10 shadow-sm hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:-translate-y-0.5 relative overflow-hidden"
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-medium text-base truncate text-white/90 group-hover:text-white transition-colors">
-                        {displayName}
-                      </span>
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="font-medium text-base truncate text-white/90 group-hover:text-white transition-colors">
+                          {displayName}
+                        </span>
+                        {conversation.otherParticipant.is_online && (
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" title="Online" />
+                        )}
+                      </div>
                       {conversation.unread_count > 0 && (
                         <span className="shrink-0 ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-sm animate-in zoom-in">
                           {conversation.unread_count}
@@ -267,10 +275,13 @@ export function ChatSidebar() {
                             <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
                           )}
                           <div className={cn(
-                            "mt-1 text-[9px] font-medium opacity-60 flex items-center",
-                            isSender ? "justify-end text-white/80" : "justify-start text-muted-foreground"
+                            "mt-1 text-[9px] font-medium opacity-60 flex items-center gap-1",
+                            isSender ? "justify-end text-white/80" : "justify-start text-white/50"
                           )}>
                             {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {isSender && (
+                              <CheckCheck className={cn("h-3 w-3", message.is_read ? "text-blue-400" : "text-white/40")} />
+                            )}
                           </div>
                         </div>
                       </div>
