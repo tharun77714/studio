@@ -152,24 +152,24 @@ export function ChatSidebar() {
   }
 
   return (
-    <Card className="fixed right-0 top-16 bottom-0 z-50 flex h-[calc(100vh-4rem)] w-[400px] flex-col border-l border-white/20 shadow-2xl bg-background/80 backdrop-blur-2xl animate-in slide-in-from-right-8 duration-300 rounded-none rounded-tl-2xl">
+    <Card className="fixed right-6 bottom-6 z-50 flex h-[600px] max-h-[calc(100vh-6rem)] w-[380px] flex-col overflow-hidden border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] bg-black/80 backdrop-blur-3xl animate-in fade-in slide-in-from-bottom-8 duration-300 rounded-3xl">
       {/* Premium Header */}
-      <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 px-6 py-4 bg-gradient-to-r from-transparent to-primary/5 shrink-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-white/5 px-6 py-5 bg-black/40 shrink-0">
         <div className="flex items-center gap-2">
           {activeConversationId ? (
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setActiveConversationId(null)} 
-              className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+              className="h-8 w-8 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
           ) : (
-            <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+            <Sparkles className="h-5 w-5 text-primary/80" />
           )}
-          <CardTitle className="flex items-center text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-            {activeConversationId ? activeDisplayName : 'Sparkle Chats'}
+          <CardTitle className="flex items-center text-lg font-medium text-white tracking-wide">
+            {activeConversationId ? activeDisplayName : 'Sparkle Assistant'}
           </CardTitle>
         </div>
         <Button variant="ghost" size="icon" onClick={closeChat} className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors">
@@ -203,10 +203,10 @@ export function ChatSidebar() {
                     key={conversation.id}
                     type="button"
                     onClick={() => setActiveConversationId(conversation.id)}
-                    className="w-full rounded-2xl px-5 py-4 text-left text-sm transition-all duration-500 ease-[cubic-bezier(0.25,1,0.25,1)] group flex flex-col gap-2 border border-white/5 bg-black/20 backdrop-blur-md hover:bg-primary/10 hover:border-primary/30 shadow-sm hover:shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:-translate-y-0.5 relative overflow-hidden"
+                    className="w-full rounded-2xl px-5 py-4 text-left text-sm transition-all duration-500 ease-[cubic-bezier(0.25,1,0.25,1)] group flex flex-col gap-2 border border-white/5 bg-white/[0.02] backdrop-blur-md hover:bg-white/5 hover:border-white/10 shadow-sm hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:-translate-y-0.5 relative overflow-hidden"
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-semibold text-base truncate text-foreground group-hover:text-primary transition-colors">
+                      <span className="font-medium text-base truncate text-white/90 group-hover:text-white transition-colors">
                         {displayName}
                       </span>
                       {conversation.unread_count > 0 && (
@@ -245,10 +245,10 @@ export function ChatSidebar() {
                       <div key={message.id} className={cn("flex w-full", isSender ? "justify-end" : "justify-start")}>
                         <div
                           className={cn(
-                            "relative max-w-[80%] px-4 py-2.5 text-[13px] shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2",
+                            "relative max-w-[85%] px-4 py-3 text-[13px] shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2",
                             isSender 
-                              ? "bg-gradient-to-br from-primary to-purple-600 text-white rounded-2xl rounded-br-sm shadow-[0_4px_14px_0_rgba(var(--primary),0.3)]" 
-                              : "bg-card border border-white/20 text-foreground rounded-2xl rounded-bl-sm backdrop-blur-md"
+                              ? "bg-white/10 text-white border border-white/10 rounded-2xl rounded-br-sm shadow-[0_4px_14px_0_rgba(0,0,0,0.2)]" 
+                              : "bg-black/40 text-white/90 border border-white/5 rounded-2xl rounded-bl-sm shadow-[0_4px_14px_0_rgba(0,0,0,0.2)]"
                           )}
                         >
                           {message.message_type === 'image' ? (
@@ -291,7 +291,7 @@ export function ChatSidebar() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background/50 text-muted-foreground transition hover:bg-primary hover:text-primary-foreground shadow-sm"
+                  className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/5 text-white/50 transition hover:bg-white/10 hover:text-white shadow-sm"
                   disabled={isUploading}
                   aria-label="Upload image"
                 >
@@ -307,7 +307,7 @@ export function ChatSidebar() {
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Type your message..."
                   disabled={isSendingMessage}
-                  className="flex-1 border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-0 text-foreground placeholder:text-muted-foreground/70"
+                  className="flex-1 border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-0 text-white placeholder:text-white/40"
                 />
                 
                 <button
@@ -317,7 +317,7 @@ export function ChatSidebar() {
                     "group flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition shadow-sm",
                     isRecording 
                       ? "bg-red-500/80 text-white" 
-                      : "bg-background/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                      : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
                   )}
                   disabled={!isSpeechSupported}
                   aria-label="Record voice"
@@ -328,7 +328,7 @@ export function ChatSidebar() {
                 <Button
                   type="submit"
                   size="icon"
-                  className="h-10 w-10 shrink-0 rounded-full shadow-[0_0_15px_rgba(var(--primary),0.3)] transition-all hover:shadow-[0_0_25px_rgba(var(--primary),0.5)] hover:scale-105"
+                  className="h-10 w-10 shrink-0 rounded-full shadow-sm bg-white/10 text-white hover:bg-white/20 transition-all hover:scale-105"
                   disabled={isSendingMessage || !draft.trim()}
                 >
                   <Send className="h-4 w-4 ml-0.5" />

@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Gem, Palette, Tag, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { TiltCard } from '@/components/ui/tilt-card';
 
 // Define a type for JewelryItem, consistent with what BusinessNetworkView saves
 export interface JewelryItem {
@@ -72,14 +71,14 @@ export function JewelryCard({ id, name, type, style, material, description, imag
   };
 
   return (
-    <TiltCard className="h-full">
-      <Card className={cn("overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full relative group bg-card/80 backdrop-blur-md border border-white/20", className)}>
+    <div className="h-full">
+      <Card className={cn("overflow-hidden flex flex-col h-full relative group bg-black/40 backdrop-blur-2xl border border-white/5 transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]", className)}>
         <CardHeader className="p-0">
-          <div className="aspect-[3/2] relative w-full bg-gray-100 overflow-hidden luxury-glare-container">
+          <div className="aspect-[3/2] relative w-full bg-black/60 overflow-hidden luxury-glare-container">
             <img
               src={normalizedImageUrl}
               alt={name}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               loading="lazy"
               onError={(event) => {
                 const target = event.currentTarget;
@@ -110,6 +109,6 @@ export function JewelryCard({ id, name, type, style, material, description, imag
           </div>
         </CardContent>
       </Card>
-    </TiltCard>
+    </div>
   );
 }

@@ -82,7 +82,6 @@ export async function middleware(request: NextRequest) {
       ];
 
       const INDIVIDUAL_ONLY_ROUTES = [
-        '/dashboard/customizer',
         '/dashboard/my-orders',
         '/dashboard/wishlist',
         '/dashboard/profile',
