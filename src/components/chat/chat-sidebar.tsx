@@ -168,12 +168,27 @@ export function ChatSidebar() {
           ) : (
             <Sparkles className="h-5 w-5 text-primary/80" />
           )}
-          <CardTitle className="flex items-center gap-2 text-lg font-medium text-white tracking-wide">
-            {activeConversationId ? activeDisplayName : 'Sparkle Assistant'}
-            {activeConversationId && activeConversationTargetProfile?.is_online && (
-              <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" title="Online" />
+          <div className="flex flex-col">
+            <CardTitle className="flex items-center gap-2 text-lg font-medium text-white tracking-wide">
+              {activeConversationId ? activeDisplayName : 'Sparkle Assistant'}
+              {activeConversationId && activeConversationTargetProfile && (
+                activeConversationTargetProfile.is_online ? (
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" title="Online" />
+                ) : (
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-red-500/80 shadow-[0_0_8px_rgba(239,68,68,0.4)]" title="Offline" />
+                )
+              )}
+            </CardTitle>
+            {activeConversationId && activeConversationTargetProfile && (
+              <span className="text-[10px] text-white/50 font-medium tracking-wide">
+                {activeConversationTargetProfile.is_online 
+                  ? 'online' 
+                  : activeConversationTargetProfile.last_seen 
+                    ? `last seen ${new Date(activeConversationTargetProfile.last_seen).toLocaleDateString() === new Date().toLocaleDateString() ? 'today at ' + new Date(activeConversationTargetProfile.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date(activeConversationTargetProfile.last_seen).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                    : 'offline'}
+              </span>
             )}
-          </CardTitle>
+          </div>
         </div>
         <Button variant="ghost" size="icon" onClick={closeChat} className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors">
           <XCircle className="h-5 w-5" />
@@ -213,15 +228,26 @@ export function ChatSidebar() {
                         <span className="font-medium text-base truncate text-white/90 group-hover:text-white transition-colors">
                           {displayName}
                         </span>
-                        {conversation.otherParticipant.is_online && (
+                        {conversation.otherParticipant.is_online ? (
                           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" title="Online" />
+                        ) : (
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500/80 shadow-[0_0_6px_rgba(239,68,68,0.4)]" title="Offline" />
                         )}
                       </div>
-                      {conversation.unread_count > 0 && (
-                        <span className="shrink-0 ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-sm animate-in zoom-in">
-                          {conversation.unread_count}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {conversation.last_message_at && (
+                          <span className="text-[10px] text-white/40 font-medium">
+                            {new Date(conversation.last_message_at).toLocaleDateString() === new Date().toLocaleDateString() 
+                              ? new Date(conversation.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              : new Date(conversation.last_message_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          </span>
+                        )}
+                        {conversation.unread_count > 0 && (
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-sm animate-in zoom-in">
+                            {conversation.unread_count}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <p className="line-clamp-2 text-xs text-muted-foreground/80 leading-relaxed">
                       {conversation.last_message_content || 'No messages yet'}
