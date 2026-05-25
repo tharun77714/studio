@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -279,59 +280,59 @@ export function BusinessNetworkView() {
 
   return (
     <div className="space-y-8 pb-16">
-      <Card className="shadow-lg overflow-hidden">
-        <div className="relative h-48 md:h-64 w-full bg-secondary/30">
-             <Image
-                src={`https://placehold.co/1200x400.png?text=${encodeURIComponent(profile.business_name || "Your Business")}`}
-                alt={`${profile.business_name || "Your Business"} banner`}
-                layout="fill"
-                objectFit="cover"
-                priority
-                data-ai-hint="business banner"
-              />
-            <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
-                <ShoppingBag className="h-16 w-16 text-white/80 mb-2" />
-                <h1 className="font-headline text-3xl md:text-5xl font-bold text-white text-center shadow-md">
-                    {profile.business_name || "Your Business"}
-                </h1>
-                <p className="text-sm text-white/90 mt-1">Manage your profile, items, and branches here.</p>
-            </div>
-        </div>
-        <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Cinematic Minimalist Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.25, 1, 0.25, 1] }}
+        className="relative w-full rounded-[2rem] overflow-hidden border border-white/5 bg-black/20 backdrop-blur-2xl p-8 lg:p-12 shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+      >
+         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+         
+         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-center gap-6">
+                <div className="h-24 w-24 rounded-[1.5rem] bg-black/60 border border-white/10 flex items-center justify-center shadow-inner relative overflow-hidden">
+                    {/* Add a subtle glow behind the icon inside the box */}
+                    <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-150 opacity-50" />
+                    <ShoppingBag className="h-10 w-10 text-primary relative z-10" />
+                </div>
                 <div>
-                    <div className="flex items-center text-muted-foreground mb-2">
-                        <MapPin className="h-5 w-5 mr-2 text-primary shrink-0" />
-                        <span>{profile.business_address_text || "Address not set"}</span>
-                        {/* Restriction badge */}
-                        {profile.role === 'business' ? (
-                          <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded bg-green-100 text-green-800 text-xs font-medium" title="Only business owners can edit store location">
-                            <Lock className="h-3 w-3 mr-1 text-green-600" /> Owner Editable
-                          </span>
-                        ) : (
-                          <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-xs font-medium" title="View only. Store location can only be set by the business owner.">
-                            <Lock className="h-3 w-3 mr-1 text-gray-500" /> View Only
-                          </span>
-                        )}
+                    <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-white mb-3">
+                        {profile.business_name || "Your Business"}
+                    </h1>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-white/60 font-medium tracking-wide">
+                        <span className="flex items-center">
+                            <MapPin className="h-4 w-4 mr-2 text-primary" />
+                            {profile.business_address_text || "Location not configured"}
+                        </span>
+                        <span className="flex items-center">
+                            <Briefcase className="h-4 w-4 mr-2 text-primary" />
+                            {profile.business_type || "Type unassigned"}
+                        </span>
                     </div>
-                    <p className="text-sm text-foreground flex items-center">
-                        <Briefcase className="h-4 w-4 mr-2 text-primary shrink-0" />
-                        Registered as: <span className="font-semibold ml-1">{profile.business_type || "Type not set"}</span>
-                    </p>
-                    {/* Prompt to add location if missing (for business owner) */}
-                    {profile.role === 'business' && (!profile.business_address_lat || !profile.business_address_lng) && (
-                      <div className="mt-4 bg-yellow-100 border border-yellow-300 rounded p-3 flex items-center gap-3">
-                        <span className="text-yellow-800 text-sm">Add your store location on the map so customers can find you!</span>
-                        <Button size="sm" variant="secondary" onClick={() => setIsEditingProfile(true)}>
-                          <MapPin className="mr-1 h-4 w-4" /> Add Location
-                        </Button>
-                      </div>
+                    {/* Restriction badge / Action Prompt */}
+                    {profile.role === 'business' ? (
+                        (!profile.business_address_lat || !profile.business_address_lng) && (
+                        <div className="mt-4 bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3 inline-flex">
+                            <span className="text-primary text-sm font-medium">Configure store location to appear on maps.</span>
+                            <Button size="sm" variant="ghost" className="text-primary hover:bg-primary/20" onClick={() => setIsEditingProfile(true)}>
+                                Set Location
+                            </Button>
+                        </div>
+                        )
+                    ) : (
+                        <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-xs font-medium">
+                            <Lock className="h-3 w-3 mr-2" /> View Only Access
+                        </div>
                     )}
                 </div>
+            </div>
+            
+            <div className="mt-4 md:mt-0">
                 <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="mt-2 sm:mt-0" onClick={() => setIsEditingProfile(true)}>
-                      <Edit className="mr-2 h-4 w-4" /> Edit Your Business Profile
+                    <Button className="rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white transition-all px-8 h-12 tracking-wide font-medium">
+                      <Edit className="mr-2 h-4 w-4" /> Configure Profile
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[625px]">
@@ -431,18 +432,19 @@ export function BusinessNetworkView() {
                   </DialogContent>
                 </Dialog>
             </div>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
       <Separator />
 
       <div className="grid md:grid-cols-2 gap-6">
-        <Card className="shadow-lg">
-            <CardHeader>
-            <CardTitle className="font-headline text-2xl flex items-center"><UploadCloud className="mr-3 h-7 w-7 text-primary"/>List New Jewelry Item</CardTitle>
-            <CardDescription>Add your jewelry pieces to the Sparkle Studio catalog. Provide an image URL for each item.</CardDescription>
-            </CardHeader>
-            <CardContent>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 1, 0.25, 1] }} className="rounded-[2rem] border border-white/5 bg-black/20 backdrop-blur-md p-8 lg:p-10 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full pointer-events-none" />
+            <div className="mb-8 relative z-10">
+                <h2 className="text-2xl font-medium tracking-wide text-white flex items-center"><UploadCloud className="mr-3 h-6 w-6 text-primary"/>List New Jewelry Item</h2>
+                <p className="text-white/50 text-sm mt-2 tracking-wide">Add your jewelry pieces to the digital showroom catalog.</p>
+            </div>
+            <div className="relative z-10">
             <Form {...jewelryForm}>
                 <form onSubmit={jewelryForm.handleSubmit(onJewelrySubmit)} className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-6">
@@ -469,29 +471,30 @@ export function BusinessNetworkView() {
                     )}
                     />
                 </div>
-                <Button type="submit" className="btn-primary-sparkle" disabled={isSubmittingJewelry}>
+                <Button type="submit" className="w-full h-12 rounded-xl bg-primary text-black hover:bg-primary/90 transition-all font-medium tracking-wide uppercase text-xs shadow-[0_0_15px_rgba(212,175,55,0.2)]" disabled={isSubmittingJewelry}>
                     {isSubmittingJewelry ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-                    List This Item
+                    Publish Item
                 </Button>
                 </form>
             </Form>
-            </CardContent>
-        </Card>
+            </div>
+        </motion.div>
 
-        <Card className="shadow-lg">
-          <CardHeader className="text-center">
-            <Building className="mx-auto h-12 w-12 text-primary mb-2" />
-            <CardTitle className="font-headline text-2xl">Branch Management</CardTitle>
-            <CardDescription>
-              Expand your business by adding and managing branch locations. (Feature under development)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center space-y-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 1, 0.25, 1] }} className="rounded-[2rem] border border-white/5 bg-black/20 backdrop-blur-md p-8 lg:p-10 shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full pointer-events-none" />
+          <div className="relative z-10 flex flex-col items-center">
+            <Building className="h-12 w-12 text-primary/80 mb-6" />
+            <h2 className="text-2xl font-medium tracking-wide text-white mb-3">Branch Management</h2>
+            <p className="text-white/50 text-sm mb-10 tracking-wide max-w-sm">
+              Expand your showroom network by adding and managing physical locations.
+            </p>
+          </div>
+          <div className="w-full relative z-10">
             <Dialog open={showAddBranchDialog} onOpenChange={setShowAddBranchDialog}>
               <DialogTrigger asChild>
-                <Button size="lg" className="btn-primary-sparkle w-full max-w-xs">
-                  <PlusCircle className="mr-2 h-5 w-5" />
-                  Add New Branch Location
+                <Button className="w-full h-12 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all font-medium tracking-wide uppercase text-xs">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Location
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[625px]">
@@ -552,15 +555,15 @@ export function BusinessNetworkView() {
                 </Form>
               </DialogContent>
             </Dialog>
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
       </div>
       
       <Separator />
 
-      <div>
-        <h2 className="font-headline text-2xl md:text-3xl font-semibold mb-6 flex items-center gap-2">
-          <ListOrdered className="h-7 w-7 text-accent" /> Your Listed Items
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 1, 0.25, 1] }}>
+        <h2 className="text-2xl md:text-3xl font-medium tracking-wide text-white mb-8 flex items-center gap-3">
+          <ListOrdered className="h-6 w-6 text-primary" /> Active Showroom Items
         </h2>
         {isLoadingItems ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -583,13 +586,13 @@ export function BusinessNetworkView() {
             ))}
           </div>
         ) : (
-          <Card className="flex flex-col items-center justify-center py-12 border-dashed bg-muted/20">
-            <PackageSearch className="h-16 w-16 text-muted-foreground mb-4" />
-            <p className="text-lg text-muted-foreground">You haven't listed any jewelry items yet.</p>
-            <p className="text-sm text-muted-foreground">Items you add will appear here.</p>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-24 border border-white/5 rounded-[2rem] bg-black/20 backdrop-blur-md">
+            <PackageSearch className="h-16 w-16 text-white/20 mb-6" />
+            <p className="text-lg text-white/80 font-medium tracking-wide mb-2">Your showroom is empty.</p>
+            <p className="text-sm text-white/50 tracking-wide">Items you publish will appear here beautifully formatted.</p>
+          </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

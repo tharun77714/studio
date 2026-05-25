@@ -114,8 +114,8 @@ export function DashboardSidebar() {
             {!isCollapsed && <span className="z-10">Messages</span>}
           </button>
         )}
-        <div className={cn("flex", isCollapsed ? "justify-center px-0" : "px-3")}>
-          <AuthNavMenu />
+        <div className={cn("flex", isCollapsed ? "justify-center px-1" : "px-3")}>
+          <AuthNavMenu isCollapsed={isCollapsed} />
         </div>
       </div>
     </motion.aside>

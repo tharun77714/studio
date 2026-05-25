@@ -14,8 +14,9 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from "@/lib/utils";
 
-export function AuthNavMenu() {
+export function AuthNavMenu({ isCollapsed }: { isCollapsed?: boolean }) {
   const { user, profile, signOut, isLoading } = useAuth();
   const router = useRouter();
 
@@ -25,20 +26,20 @@ export function AuthNavMenu() {
   };
 
   if (isLoading) {
-    return <Button variant="ghost" size="sm" disabled><Loader2 className="h-4 w-4 animate-spin" /> Loading...</Button>;
+    return <Button variant="ghost" size="sm" disabled><Loader2 className="h-4 w-4 animate-spin" /> {isCollapsed ? "" : "Loading..."}</Button>;
   }
 
   if (!user || !profile) {
     return (
-      <div className="flex items-center gap-2">
-         <Button variant="outline" size="sm" asChild>
-            <Link href="/auth/individual/signin">
-                <User className="mr-1 md:mr-2 h-4 w-4"/> <span className="hidden md:inline">Client Sign In</span>
+      <div className={cn("flex gap-2", isCollapsed ? "flex-col items-center" : "items-center")}>
+         <Button variant="outline" size="sm" asChild className={cn(isCollapsed && "h-10 w-10 p-0 rounded-full")}>
+            <Link href="/auth/individual/signin" title="Client Sign In">
+                <User className={cn("h-4 w-4", !isCollapsed && "mr-1 md:mr-2")}/> <span className={cn("hidden md:inline", isCollapsed && "md:hidden")}>Client Sign In</span>
             </Link>
          </Button>
-         <Button variant="default" size="sm" asChild className="btn-primary-sparkle">
-            <Link href="/auth/business/signin">
-                <Briefcase className="mr-1 md:mr-2 h-4 w-4"/> <span className="hidden md:inline">Business Sign In</span>
+         <Button variant="default" size="sm" asChild className={cn("btn-primary-sparkle", isCollapsed && "h-10 w-10 p-0 rounded-full")}>
+            <Link href="/auth/business/signin" title="Business Sign In">
+                <Briefcase className={cn("h-4 w-4", !isCollapsed && "mr-1 md:mr-2")}/> <span className={cn("hidden md:inline", isCollapsed && "md:hidden")}>Business Sign In</span>
             </Link>
          </Button>
       </div>
@@ -53,16 +54,15 @@ export function AuthNavMenu() {
   const profileOrNetworkLabel = profile.role === 'business' ? "Business Dashboard" : "My Profile";
   const profileIcon = profile.role === 'business' ? Settings : UserCircle;
 
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 md:h-10 md:w-auto md:px-3 md:py-2">
-           <Avatar className="h-8 w-8 md:mr-2">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
+        <Button variant="ghost" className="relative h-10 w-full rounded-xl justify-start p-2 hover:bg-white/5 transition-all">
+           <Avatar className="h-8 w-8 shrink-0">
+            <AvatarFallback className="bg-primary/20 text-primary text-xs border border-primary/30">{initials}</AvatarFallback>
           </Avatar>
-          <span className="hidden md:inline text-sm font-medium">{profileName || "Profile"}</span>
-          <ChevronDown className="ml-1 h-4 w-4 opacity-70 hidden md:inline" />
+          <span className={cn("hidden md:inline text-sm font-medium ml-3 truncate text-foreground/90", isCollapsed && "md:hidden")}>{profileName || "Profile"}</span>
+          <ChevronDown className={cn("ml-auto h-4 w-4 opacity-50 hidden md:inline", isCollapsed && "md:hidden")} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">

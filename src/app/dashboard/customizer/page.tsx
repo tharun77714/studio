@@ -456,13 +456,16 @@ export default function CustomizerPage() {
                                (baseImageDataUri && !isCustomizationProvided() && !baseImageFile); 
 
   return (
-    <div className="space-y-8 pb-16">
-      <div className="text-center">
-        <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-2">
-          AI Jewelry Customizer
+    <div className="space-y-10 pb-20 max-w-7xl mx-auto">
+      <div className="text-center relative py-12">
+        <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+           <div className="w-64 h-64 bg-primary/20 blur-[100px] rounded-full" />
+        </div>
+        <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-white mb-4 relative z-10">
+          Design Laboratory
         </h1>
-        <p className="text-muted-foreground">
-          Upload an image to customize, or describe a new design. Each step builds on the last.
+        <p className="text-white/50 text-sm md:text-base tracking-wide max-w-2xl mx-auto relative z-10">
+          Upload an inspiration piece or describe your vision. Our AI operating system will render your bespoke creation in real-time.
         </p>
       </div>
 
@@ -474,33 +477,44 @@ export default function CustomizerPage() {
         </Alert>
       )}
 
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl flex items-center"><Sparkles className="mr-2 h-6 w-6 text-primary"/>Design Your Masterpiece</CardTitle>
-          <CardDescription>Upload an image to modify, or use the prompt/controls to generate a new design. Each generation becomes the base for the next refinement.</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.25, 1, 0.25, 1] }}
+        className="rounded-[2rem] border border-white/5 bg-black/40 backdrop-blur-2xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] overflow-hidden relative"
+      >
+        <div className="p-8 md:p-12">
+          <div className="flex items-center gap-3 mb-8 pb-6 border-b border-white/5">
+            <Sparkles className="h-6 w-6 text-primary"/>
+            <h2 className="text-2xl font-medium tracking-wide text-white">Configuration Engine</h2>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="baseImage" className="text-lg font-medium">1. Upload Initial Jewelry Image (Optional)</Label>
+            <div className="space-y-4">
+              <Label htmlFor="baseImage" className="text-sm uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">1</span>
+                Initial Inspiration Image
+              </Label>
               <div className="flex items-center justify-center w-full">
                 <label
                   htmlFor="baseImage"
-                  className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent/10 border-input transition-colors"
+                  className="relative flex flex-col items-center justify-center w-full h-56 rounded-[1.5rem] cursor-pointer bg-black/20 border border-white/10 hover:border-primary/50 hover:bg-black/40 transition-all group overflow-hidden"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   {baseImageDataUri && !baseImageFile ? ( 
-                     <div className="relative w-36 h-36">
-                        <Image src={baseImageDataUri} alt="Current Base" layout="fill" objectFit="contain" className="rounded-md" />
+                     <div className="relative w-40 h-40 z-10">
+                        <Image src={baseImageDataUri} alt="Current Base" layout="fill" objectFit="contain" className="rounded-xl shadow-2xl" />
                      </div>
                   ) : baseImageFile && baseImageDataUri ? ( 
-                     <div className="relative w-36 h-36">
-                        <Image src={baseImageDataUri} alt="Preview" layout="fill" objectFit="contain" className="rounded-md" />
+                     <div className="relative w-40 h-40 z-10">
+                        <Image src={baseImageDataUri} alt="Preview" layout="fill" objectFit="contain" className="rounded-xl shadow-2xl" />
                      </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
-                      <UploadCloud className="w-10 h-10 mb-3" />
-                      <p className="mb-2 text-sm"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                      <p className="text-xs">PNG, JPG, WEBP (MAX. 5MB)</p>
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-white/40 group-hover:text-white/80 transition-colors z-10">
+                      <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                        <UploadCloud className="w-8 h-8 text-primary" />
+                      </div>
+                      <p className="mb-2 text-sm tracking-wide"><span className="font-medium text-white">Click to upload</span> or drag and drop</p>
+                      <p className="text-xs uppercase tracking-widest opacity-50">PNG, JPG, WEBP</p>
                     </div>
                   )}
                   <Input id="baseImage" type="file" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} className="hidden" />
@@ -527,50 +541,57 @@ export default function CustomizerPage() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-lg font-medium">2. Choose Customization Method</Label>
-              <Tabs value={customizationTab} onValueChange={setCustomizationTab}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="prompt"><Lightbulb className="mr-2 h-4 w-4" />Prompt AI</TabsTrigger>
-                  <TabsTrigger value="manual"><SlidersHorizontal className="mr-2 h-4 w-4" />Manual Controls</TabsTrigger>
+            <div className="space-y-6 mt-10">
+              <Label className="text-sm uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">2</span>
+                Design Parameters
+              </Label>
+              <Tabs value={customizationTab} onValueChange={setCustomizationTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 p-1 bg-black/40 border border-white/10 rounded-xl h-14">
+                  <TabsTrigger value="prompt" className="rounded-lg text-sm tracking-wide data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50"><Lightbulb className="mr-2 h-4 w-4" />Neural Prompt</TabsTrigger>
+                  <TabsTrigger value="manual" className="rounded-lg text-sm tracking-wide data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50"><SlidersHorizontal className="mr-2 h-4 w-4" />Manual Parameters</TabsTrigger>
                 </TabsList>
-                <TabsContent value="prompt" className="pt-4 space-y-2">
-                    <Label htmlFor="customizationPrompt" className="text-base font-normal">
-                      {baseImageDataUri ? "Describe changes to the current base image" : "Describe the new jewelry design you want to create"}
+                <TabsContent value="prompt" className="pt-6 space-y-4">
+                    <Label htmlFor="customizationPrompt" className="text-sm text-white/70 tracking-wide font-normal">
+                      {baseImageDataUri ? "Detail modifications to the base model" : "Describe the bespoke vision for your new piece"}
                     </Label>
-                    <Textarea
-                        id="customizationPrompt"
-                        value={customizationPrompt}
-                        onChange={(e) => setCustomizationPrompt(e.target.value)}
-                        placeholder={baseImageDataUri 
-                            ? "e.g., 'Change the gemstone to a large oval sapphire with a vintage style', 'Add floral engravings with a matte finish'" 
-                            : "e.g., 'A silver necklace with a crescent moon pendant, polished finish, and small blue stars', 'Gold ring, ruby gemstone, emerald cut, art deco style'"
-                        }
-                        rows={5}
-                        className="text-base pr-10" // Add padding for the icon
-                    />
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="relative">
+                        <Textarea
+                            id="customizationPrompt"
+                            value={customizationPrompt}
+                            onChange={(e) => setCustomizationPrompt(e.target.value)}
+                            placeholder={baseImageDataUri 
+                                ? "e.g., 'Change the gemstone to a large oval sapphire with a vintage style', 'Add floral engravings with a matte finish'" 
+                                : "e.g., 'A silver necklace with a crescent moon pendant, polished finish, and small blue stars', 'Gold ring, ruby gemstone, emerald cut, art deco style'"
+                            }
+                            rows={6}
+                            className="text-base bg-black/20 border-white/10 focus-visible:ring-primary focus-visible:border-primary text-white placeholder:text-white/30 rounded-xl p-4 resize-none shadow-inner" 
+                        />
+                        <div className="absolute bottom-4 right-4">
+                           <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleSpeechInput}
+                            disabled={isLoading || isEnhancingPrompt || !('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)}
+                            className={`h-10 w-10 rounded-full border border-white/10 bg-black/40 backdrop-blur-md transition-all duration-300 ${isRecording ? 'text-red-500 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-pulse' : 'text-primary hover:bg-primary/20'}`}
+                            aria-label={isRecording ? "Stop speech input" : "Start speech input"}
+                          >
+                            {isRecording ? <LucideMicOff size={18} /> : <LucideMic size={18} />}
+                          </Button>
+                        </div>
+                    </div>
+                    <div className="flex justify-end mt-2">
                       <Button
                           type="button"
-                          variant="outline"
+                          variant="ghost"
                           onClick={handleEnhancePrompt}
                           disabled={isEnhancingPrompt || isLoading || !customizationPrompt.trim()}
-                          className="flex-1 sm:flex-none"
+                          className="text-xs uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10"
                       >
-                          {isEnhancingPrompt ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                          ENHANCE MY PROMPT
+                          {isEnhancingPrompt ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Wand2 className="mr-2 h-3 w-3" />}
+                          AI Enhance Prompt
                       </Button> 
-                       <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={handleSpeechInput}
-                        disabled={isLoading || isEnhancingPrompt || !('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)}
-                        className={`shrink-0 transition-colors duration-200 ease-in-out ${isRecording ? 'text-red-500 hover:text-red-600 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
-                        aria-label={isRecording ? "Stop speech input" : "Start speech input"}
-                      >
-                        {isRecording ? <LucideMicOff size={20} /> : <LucideMic size={20} />}
-                    </Button>
                     </div>
                 </TabsContent>
                  <TabsContent value="manual" className="pt-4 space-y-6">
@@ -654,22 +675,24 @@ export default function CustomizerPage() {
               </Tabs>
             </div>
 
-            <Button type="submit" disabled={!!submitButtonDisabled} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-6">
-              {isLoading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Sparkles className="mr-2 h-5 w-5" />
-              )}
-              {submitButtonText}
-            </Button>
-            {baseImageDataUri && (
-              <Button variant="destructive" onClick={handleStartOver} className="w-full mt-4">
-                GENERATE NEW DESIGN (START OVER)
+            <div className="pt-8 mt-8 border-t border-white/5">
+              <Button type="submit" disabled={!!submitButtonDisabled} className="w-full h-16 rounded-[1rem] bg-primary text-black hover:bg-primary/90 transition-all font-medium tracking-widest uppercase text-sm shadow-[0_0_30px_rgba(212,175,55,0.3)]">
+                {isLoading ? (
+                  <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-3 h-5 w-5" />
+                )}
+                {submitButtonText}
               </Button>
-            )}
+              {baseImageDataUri && (
+                <Button variant="ghost" onClick={handleStartOver} className="w-full mt-4 text-xs tracking-widest uppercase text-white/40 hover:text-white hover:bg-white/5">
+                  Reset Laboratory
+                </Button>
+              )}
+            </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
       {(isLoading || customizedImageDataUri || (baseImageDataUri && !baseImageFile) ) && (
          <div className="grid md:grid-cols-2 gap-8 mt-12">
@@ -701,33 +724,42 @@ export default function CustomizerPage() {
           )}
 
           {customizedImageDataUri && !isLoading && (
-            <Card className={`animate-in fade-in duration-500 overflow-hidden bg-card/60 backdrop-blur-2xl border border-primary/20 shadow-2xl ${(!baseImageDataUri || baseImageFile) && !isLoading ? 'md:col-span-2' : ''}`}>
-              <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-white/5">
-                <CardTitle className="text-xl flex items-center tracking-wide font-medium">
-                  <Sparkles className="mr-2 h-5 w-5 text-primary"/>
-                  Luxury Atelier Result
-                </CardTitle>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 1, 0.25, 1] }}
+              className={`rounded-[2rem] border border-primary/20 bg-black/60 backdrop-blur-3xl shadow-[0_40px_80px_rgba(0,0,0,0.6)] overflow-hidden relative ${(!baseImageDataUri || baseImageFile) && !isLoading ? 'md:col-span-2' : ''}`}
+            >
+              <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full" />
+              </div>
+
+              <div className="p-8 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
+                <h3 className="text-2xl font-medium tracking-wide text-white flex items-center">
+                  <Sparkles className="mr-3 h-6 w-6 text-primary"/>
+                  Output Renderer
+                </h3>
                 
                 {/* Segmented Tab Control */}
-                <div className="flex bg-black/50 p-1 rounded-full border border-white/10 w-fit">
+                <div className="flex bg-black/60 p-1.5 rounded-full border border-white/10 w-fit backdrop-blur-md">
                   <button 
                     type="button"
                     onClick={() => setPreviewMode("2d")}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${previewMode === "2d" ? "bg-primary text-black" : "text-muted-foreground hover:text-white"}`}
+                    className={`px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-500 ${previewMode === "2d" ? "bg-primary text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]" : "text-white/50 hover:text-white"}`}
                   >
                     2D Render
                   </button>
                   <button 
                     type="button"
                     onClick={() => setPreviewMode("3d")}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${previewMode === "3d" ? "bg-primary text-black" : "text-muted-foreground hover:text-white"}`}
+                    className={`px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-500 ${previewMode === "3d" ? "bg-primary text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]" : "text-white/50 hover:text-white"}`}
                   >
                     Interactive 3D
                   </button>
                 </div>
-              </CardHeader>
+              </div>
               
-              <CardContent className="p-6">
+              <div className="p-8 pt-4 relative z-10">
                 {previewMode === "2d" ? (
                   <div className="flex flex-col items-center">
                     {/* 2D Mode with Champagne Gold Glare Sweep */}
@@ -813,40 +845,46 @@ export default function CustomizerPage() {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
           )}
         </div>
       )}
 
       {imageHistory.length > 0 && !isLoading && (customizedImageDataUri || (baseImageDataUri && !baseImageFile)) && (
-        <Card className="mt-8 animate-in fade-in duration-500">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center">
-              <History className="mr-2 h-5 w-5 text-muted-foreground" /> Design History (Last 3 Iterations)
-            </CardTitle>
-            <CardDescription>Click an image to view it and use it as the new base for further customization. Inputs above will be cleared. Hover over an image to see the prompt used.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 1, 0.25, 1] }}
+          className="mt-8 rounded-2xl border border-white/5 bg-black/40 backdrop-blur-xl overflow-hidden"
+        >
+          <div className="p-6 border-b border-white/5">
+            <h3 className="text-lg font-medium tracking-wide text-white flex items-center">
+              <History className="mr-3 h-5 w-5 text-white/50" /> Iteration Archive
+            </h3>
+            <p className="text-sm text-white/40 mt-1 tracking-wide">Select an iteration to restore it to the laboratory.</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 p-6">
             {imageHistory.map((historyItem, index) => (
               <button
                 key={index}
                 title={historyItem.description}
                 onClick={() => handleHistoryImageSelect(historyItem)}
-                className={`border rounded-lg overflow-hidden hover:shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${baseImageDataUri === historyItem.imageUrl ? 'ring-2 ring-primary shadow-lg scale-105' : 'hover:opacity-80'}`}
+                className={`relative group rounded-xl overflow-hidden transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${baseImageDataUri === historyItem.imageUrl ? 'ring-2 ring-primary shadow-[0_0_20px_rgba(212,175,55,0.2)] scale-[1.02]' : 'hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]'}`}
                 aria-label={`View design version ${imageHistory.length - index}. Prompt: ${historyItem.description.substring(0, 50)}...`}
               >
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
                 <Image
                   src={historyItem.imageUrl}
                   alt={`History image ${imageHistory.length - index} - ${historyItem.description.substring(0,30)}...`}
                   width={200}
                   height={200}
-                  className="object-contain w-full h-full aspect-square bg-muted/10"
+                  className="object-contain w-full h-full aspect-square bg-black/40"
                 />
               </button>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
       )}
     </div>
   );
