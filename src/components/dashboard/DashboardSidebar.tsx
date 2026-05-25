@@ -98,7 +98,7 @@ export function DashboardSidebar() {
           >
             {isChatOpen && (
               <motion.div 
-                layoutId="activeNavIndicator"
+                layoutId="activeChatIndicator"
                 className="absolute inset-0 rounded-xl bg-primary/5 border border-primary/20"
                 transition={{ type: "spring", stiffness: 40, damping: 20, mass: 0.5 }}
               />

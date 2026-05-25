@@ -203,7 +203,7 @@ export function ChatSidebar() {
                     key={conversation.id}
                     type="button"
                     onClick={() => setActiveConversationId(conversation.id)}
-                    className="w-full rounded-2xl px-5 py-4 text-left text-sm transition-all duration-300 group flex flex-col gap-2 border bg-card/60 hover:bg-accent hover:border-primary/30 shadow-sm hover:shadow-md"
+                    className="w-full rounded-2xl px-5 py-4 text-left text-sm transition-all duration-500 ease-[cubic-bezier(0.25,1,0.25,1)] group flex flex-col gap-2 border border-white/5 bg-black/20 backdrop-blur-md hover:bg-primary/10 hover:border-primary/30 shadow-sm hover:shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:-translate-y-0.5 relative overflow-hidden"
                   >
                     <div className="flex items-center justify-between w-full">
                       <span className="font-semibold text-base truncate text-foreground group-hover:text-primary transition-colors">
