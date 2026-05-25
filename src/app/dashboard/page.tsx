@@ -1,15 +1,30 @@
-
 "use client";
 
 import { useAuth } from '@/hooks/useAuth'; 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, UserCircle, Building, Loader2, Palette, Settings } from 'lucide-react'; 
+import { ArrowRight, UserCircle, Building, Palette, Sparkles } from 'lucide-react'; 
 import { Skeleton } from '@/components/ui/skeleton';
-import { AnimatedSparkleIcon } from '@/components/common/animated-sparkle-icon';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 40, damping: 20, mass: 0.5 } }
+};
 
 export default function DashboardPage() {
   const { user, profile, isLoading: authLoading } = useAuth();
@@ -23,128 +38,118 @@ export default function DashboardPage() {
 
   if (authLoading || !profile) { 
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-12 w-1/2" />
-        <Skeleton className="h-8 w-3/4" />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/4 mb-2" /><Skeleton className="h-4 w-full" />
-          </CardHeader>
-          <CardContent><Skeleton className="h-10 w-1/3" /></CardContent>
-        </Card>
+      <div className="space-y-12">
+        <Skeleton className="h-20 w-1/2 rounded-2xl bg-white/5" />
+        <div className="grid md:grid-cols-12 gap-8">
+          <Skeleton className="h-80 md:col-span-8 rounded-3xl bg-white/5" />
+          <Skeleton className="h-80 md:col-span-4 rounded-3xl bg-white/5" />
+        </div>
       </div>
     );
   }
   
   const userRole = profile.role;
   const displayName = profile.role === 'business' ? profile.business_name : profile.full_name;
-  const welcomeTitle = userRole === 'individual' ? "Explore Your Sparkle" : "Grow Your Business";
-  const welcomeMessage = userRole === 'individual' 
-    ? "Discover stunning jewelry, connect with artisans, and find pieces that tell your story. Your journey into the world of brilliance starts here."
-    : "Showcase your masterful creations, expand your reach, and connect with a community passionate about fine jewelry. Let's build your brand.";
   
-  const profileOrNetworkLink = userRole === 'individual' ? "/dashboard/profile/individual" : "/dashboard/networks";
-  const profileOrNetworkButtonText = userRole === 'individual' ? "Go to My Profile" : "Go to Business Dashboard";
+  // Luxury copy
+  const welcomeTitle = userRole === 'individual' ? "Curate Your Collection." : "Elevate Your Brand.";
+  const subtitle = userRole === 'individual' ? "Discover pieces that tell your unique story." : "Showcase your masterful creations to a discerning audience.";
 
   return (
-    <div className="space-y-8">
-      <div className="p-6 md:p-8 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-border shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-          {userRole === 'individual' ? 
-            <UserCircle className="h-12 w-12 text-accent shrink-0" /> : 
-            <Building className="h-12 w-12 text-primary shrink-0" />
-          }
-          <div>
-            <h1 className="font-headline text-3xl md:text-4xl font-bold text-foreground">
-              {welcomeTitle}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Welcome, {displayName || user?.email}! (Mode: {userRole === 'individual' ? 'Individual Client' : 'Business Partner'})
-            </p>
-          </div>
-        </div>
-        <p className="mt-2 text-lg text-foreground/80 leading-relaxed">
-          {welcomeMessage}
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-16"
+    >
+      {/* Massive Cinematic Header */}
+      <motion.div variants={itemVariants} className="max-w-4xl">
+        <h1 className="font-headline text-5xl md:text-7xl font-bold text-foreground tracking-tighter leading-[1.1] drop-shadow-sm">
+          {welcomeTitle}
+        </h1>
+        <p className="mt-6 text-xl md:text-2xl text-muted-foreground font-light tracking-wide max-w-2xl">
+          Welcome back, <span className="text-foreground font-medium">{displayName}</span>. <br className="hidden md:block"/>{subtitle}
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <AnimatedSparkleIcon className="h-6 w-6 text-primary" />
-              <CardTitle className="font-headline text-2xl">Navigate Your Network</CardTitle>
+      {/* Bento Grid Layout */}
+      <div className="grid md:grid-cols-12 gap-6 md:gap-8 auto-rows-min">
+        
+        {/* Main Network Card - Spans 8 columns */}
+        <motion.div variants={itemVariants} className="md:col-span-8">
+          <Card className="h-full min-h-[360px] flex flex-col justify-between overflow-hidden relative group border-white/5 bg-black/40 hover:bg-black/60">
+            {/* Subtle Inner Glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out" />
+            
+            <CardHeader className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg">
+                  <Sparkles className="h-7 w-7 text-primary drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]" />
+                </div>
+                <CardTitle className="font-headline text-3xl md:text-4xl tracking-tight">The Network</CardTitle>
+              </div>
+              <CardDescription className="text-lg md:text-xl font-light text-muted-foreground/80 max-w-md leading-relaxed">
+                {userRole === 'individual' 
+                  ? 'Immerse yourself in a curated selection of fine jewelry from around the world.'
+                  : 'Manage your portfolio, track engagement, and orchestrate your business presence.'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="relative z-10 mt-auto">
+              <Button asChild size="lg" className="rounded-full px-8 py-6 text-sm uppercase tracking-widest bg-foreground text-background hover:scale-105 hover:bg-foreground/90 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                <Link href="/dashboard/networks">
+                  Enter Network <ArrowRight className="ml-3 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* AI Customizer Card - Spans 4 columns */}
+        <motion.div variants={itemVariants} className="md:col-span-4">
+          <Card className="h-full min-h-[360px] flex flex-col justify-between bg-gradient-to-b from-white/5 to-transparent border-white/5 group">
+            <div className="absolute inset-0 bg-gradient-to-t from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out" />
+            
+            <CardHeader className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 rounded-xl bg-white/5">
+                  <Palette className="h-6 w-6 text-accent drop-shadow-[0_0_8px_rgba(15,160,206,0.6)]" />
+                </div>
+                <CardTitle className="font-headline text-2xl">Studio AI</CardTitle>
+              </div>
+              <CardDescription className="text-base font-light leading-relaxed">
+                Architect your imagination. Design bespoke pieces using our generative AI engine.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto relative z-10">
+              <Button asChild variant="outline" className="w-full rounded-full py-6 uppercase tracking-widest text-xs border-white/10 hover:bg-white/10 transition-colors duration-300">
+                <Link href="/dashboard/customizer">Launch Studio</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Profile Card - Spans 12 columns (wide banner) */}
+        <motion.div variants={itemVariants} className="md:col-span-12">
+          <Card className="flex flex-col sm:flex-row items-center justify-between p-8 md:p-10 bg-black/20 border-white/5 group hover:border-white/10 transition-colors duration-500">
+            <div className="flex items-center gap-6 mb-6 sm:mb-0">
+              <div className="p-4 rounded-full bg-white/5 border border-white/10 group-hover:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.25,1)]">
+                {userRole === 'individual' ? <UserCircle className="h-8 w-8 text-muted-foreground group-hover:text-foreground transition-colors" /> : <Building className="h-8 w-8 text-muted-foreground group-hover:text-foreground transition-colors" />}
+              </div>
+              <div>
+                <h3 className="text-2xl font-headline font-semibold text-foreground tracking-tight">Identity & Settings</h3>
+                <p className="text-muted-foreground font-light mt-1">Configure your profile, security, and preferences.</p>
+              </div>
             </div>
-            <CardDescription>
-              {userRole === 'individual' 
-                ? 'Find nearby stores, get AI-powered jewelry suggestions, and browse collections.'
-                : 'Manage your business profile, list items, and oversee branch locations (soon).'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-foreground/90">
-              Ready to dive deeper? Head over to the Networks section.
-            </p>
-            <Button asChild size="lg" className={userRole === 'individual' ? 'btn-accent-sparkle' : 'btn-primary-sparkle'} 
-              style={userRole === 'individual' ? { '--accent-foreground': 'hsl(var(--accent-foreground))', backgroundColor: 'hsl(var(--accent))' } as React.CSSProperties : {}}>
-              <Link href="/dashboard/networks">
-                Go to Networks <ArrowRight className="ml-2 h-5 w-5" />
+            <Button asChild variant="ghost" className="rounded-full px-6 py-6 uppercase tracking-widest text-xs hover:bg-white/10 transition-all duration-300 group-hover:translate-x-2">
+              <Link href={userRole === 'individual' ? "/dashboard/profile/individual" : "/dashboard/networks"}>
+                Manage Identity <ArrowRight className="ml-3 h-4 w-4" />
               </Link>
             </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-lg">
-          <CardHeader>
-             <div className="flex items-center gap-2">
-                <Palette className="h-6 w-6 text-primary" />
-                <CardTitle className="font-headline text-2xl">AI Jewelry Customizer</CardTitle>
-            </div>
-            <CardDescription>
-                Unleash your creativity. Design or refine jewelry with our AI-powered customizer tool.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-foreground/90">
-                Whether you have a base image to modify or an idea to bring to life from scratch, the AI Customizer is here to help.
-            </p>
-            <Button asChild size="lg" variant="outline">
-                <Link href="/dashboard/customizer">AI Customizer <ArrowRight className="ml-2 h-5 w-5" /></Link>
-            </Button>
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
+
       </div>
-      
-       <Card className="shadow-md">
-         <CardHeader>
-           <div className="flex items-center gap-2">
-             <Settings className="h-6 w-6 text-muted-foreground" />
-             <CardTitle className="font-headline text-xl">
-                {userRole === 'individual' ? "Manage Your Profile" : "Access Business Dashboard"}
-             </CardTitle>
-           </div>
-           <CardDescription>
-            {userRole === 'individual' 
-                ? "Keep your information up-to-date for a seamless experience."
-                : "Your central hub for managing business details, items, and more."
-            }
-           </CardDescription>
-         </CardHeader>
-         <CardContent>
-           <p className="text-sm text-muted-foreground mb-3">
-             {userRole === 'individual' 
-               ? "Update your name, default shipping address, and contact details."
-               : "The Networks page now serves as your main dashboard for all business management tasks."
-             }
-           </p>
-            <Button asChild variant="outline">
-                <Link href={profileOrNetworkLink}>{profileOrNetworkButtonText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-         </CardContent>
-       </Card>
-    </div>
+    </motion.div>
   );
 }
-
-    
