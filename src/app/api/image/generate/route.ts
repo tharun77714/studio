@@ -21,20 +21,44 @@ export async function POST(request: Request) {
     const height = 1024;
     const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(constrainedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
 
-    const response = await fetch(pollinationsUrl);
+    let response: Response | null = null;
+    let errorText = '';
+    let retryCount = 0;
+    const maxRetries = 3;
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    while (retryCount < maxRetries) {
+      try {
+        response = await fetch(pollinationsUrl, { cache: 'no-store' });
+        if (response.ok) {
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.startsWith('image/')) {
+            break; // Success
+          } else {
+            errorText = `Unexpected response content-type: ${contentType}`;
+          }
+        } else {
+          errorText = `Pollinations error (${response.status}): ${await response.text()}`;
+        }
+      } catch (e: any) {
+        errorText = e.message || 'Network error';
+      }
+      retryCount++;
+      if (retryCount < maxRetries) {
+        console.log(`Retry ${retryCount}/${maxRetries} for image generation...`);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1s before retry
+      }
+    }
+
+    if (!response || !response.ok) {
       return NextResponse.json(
-        { error: `Pollinations error (${response.status}): ${errorText}` },
-        { status: response.status }
+        { error: errorText || 'Failed to generate image after retries.' },
+        { status: response ? response.status : 500 }
       );
     }
 
     const contentType = response.headers.get('content-type') || '';
     if (!contentType.startsWith('image/')) {
-      const errorText = await response.text();
-      return NextResponse.json({ error: `Unexpected response content-type: ${contentType} - ${errorText}` }, { status: 500 });
+      return NextResponse.json({ error: errorText }, { status: 500 });
     }
 
     const buffer = await response.arrayBuffer();

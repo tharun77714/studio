@@ -323,7 +323,6 @@ export default function CustomizerPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: promptText,
-          imageDataUri: baseImageDataUri || undefined,
           seed: baseImageDataUri && currentSeed ? currentSeed : undefined,
         }),
       });

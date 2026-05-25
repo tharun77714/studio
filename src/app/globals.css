@@ -4,39 +4,44 @@
 
 @layer base {
   :root {
-    --background: 240 10% 4%; /* Midnight Obsidian */
-    --foreground: 0 0% 98%; /* Frosted White */
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 6%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 45 65% 53%; /* Champagne Gold */
-    --primary-foreground: 240 10% 4%; 
-    --secondary: 240 10% 12%; 
+    --background: 0 0% 2%; /* Deep Black / Almost Black */
+    --foreground: 0 0% 96%; /* Soft White */
+    
+    --card: 240 3% 6%; /* Matte Charcoal */
+    --card-foreground: 0 0% 96%;
+    
+    --popover: 240 3% 6%;
+    --popover-foreground: 0 0% 96%;
+    
+    --primary: 43 74% 66%; /* Champagne Gold */
+    --primary-foreground: 0 0% 5%; 
+    
+    --secondary: 240 4% 16%; /* Dark Silver */
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 10% 15%; 
-    --muted-foreground: 240 5% 65%;
-    --accent: 45 65% 53%; /* Champagne Gold */
-    --accent-foreground: 240 10% 4%; 
-    --destructive: 0 62.8% 30.6%;
+    
+    --muted: 240 5% 12%; 
+    --muted-foreground: 240 5% 65%; /* Platinum Silver */
+    
+    --accent: 43 74% 66%; /* Champagne Gold */
+    --accent-foreground: 0 0% 5%; 
+    
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 10% 15%;
-    --input: 240 10% 12%;
-    --ring: 45 65% 53%; /* Champagne Gold */
-    --chart-1: 45 65% 53%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --radius: 0.25rem; /* Sharper edges for a more editorial/modern look */
-    --sidebar-background: 240 10% 4%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 45 65% 53%;
-    --sidebar-primary-foreground: 240 10% 4%;
-    --sidebar-accent: 240 10% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 10% 15%;
-    --sidebar-ring: 45 65% 53%;
+    
+    --border: 240 5% 12%;
+    --input: 240 5% 12%;
+    --ring: 43 74% 66%;
+    
+    --radius: 0; /* Luxury minimal implies sharp edges or perfect pills, no in-betweens. We use sharp by default. */
+    
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 43 74% 66%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 240 5% 12%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 240 5% 12%;
+    --sidebar-ring: 43 74% 66%;
   }
 }
 
@@ -46,46 +51,31 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Custom cinematic radial gradient */
-    background-image: radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.05), transparent 60%);
+    /* Removed the static CSS radial gradient, as WebGL will handle the cinematic lighting and depth fog */
+    /* Ensure no scrollbars break the cinematic immersion */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  body::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* Film Grain Overlay */
+/* Film Grain Overlay - Temporal Noise */
 .film-grain {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   pointer-events: none;
   z-index: 50;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-@keyframes draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-draw {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: draw 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.btn-primary-sparkle:hover {
-  box-shadow: 0 0 20px 2px hsl(var(--primary) / 0.15);
-}
-
-.pac-container {
-  z-index: 9999 !important; 
-  pointer-events: auto !important; 
-}
-.pac-item, .pac-item-query {
-  pointer-events: auto !important; 
+/* Cinematic Typography Masking */
+.text-mask-container {
+  overflow: hidden;
+  display: inline-flex;
 }
 
 /* Luxury Glare Reflection Sweep */
@@ -93,7 +83,6 @@
   position: relative;
   overflow: hidden;
 }
-
 .luxury-glare-container::after {
   content: '';
   position: absolute;
@@ -105,36 +94,26 @@
     90deg,
     transparent 0%,
     rgba(255, 255, 255, 0) 20%,
-    rgba(255, 255, 255, 0.25) 45%,
-    rgba(212, 175, 55, 0.35) 50%,
-    rgba(255, 255, 255, 0.25) 55%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(224, 194, 110, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
     rgba(255, 255, 255, 0) 80%,
     transparent 100%
   );
   transform: rotate(25deg);
   pointer-events: none;
+  transition: all 1s cubic-bezier(0.25, 1, 0.25, 1);
 }
-
 .luxury-glare-container:hover::after {
-  animation: glare-sweep 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: glare-sweep 1.8s cubic-bezier(0.25, 1, 0.25, 1) forwards;
 }
-
 @keyframes glare-sweep {
-  0% {
-    left: -150%;
-  }
-  100% {
-    left: 150%;
-  }
+  0% { left: -150%; }
+  100% { left: 150%; }
 }
 
 /* Phone Input Country Dropdown Fix for Dark Mode */
-.PhoneInputCountrySelect {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-}
-
-.PhoneInputCountrySelect option {
+.PhoneInputCountrySelect, .PhoneInputCountrySelect option {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
 }

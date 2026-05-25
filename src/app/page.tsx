@@ -1,99 +1,118 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { UserTypeSelection } from '@/components/landing/user-type-selection';
 import { PageTransition } from '@/components/ui/page-transition';
-import { SvgDrawSparkle } from '@/components/ui/svg-draw-sparkle';
-import { TextReveal } from '@/components/ui/text-reveal';
 import { MagneticButton } from '@/components/ui/magnetic-button';
-import { GoldDustCanvas } from '@/components/landing/gold-dust-canvas';
-import { useRef } from "react";
+import { Scene } from '@/components/webgl/Scene';
 import Link from "next/link";
 
+// Cinematic Typography Stagger variants
+const titleVariants = {
+  hidden: { y: "100%", opacity: 0 },
+  visible: (i: number) => ({
+    y: 0,
+    opacity: 1,
+    transition: {
+      delay: i * 0.15,
+      duration: 1.8,
+      ease: [0.25, 1, 0.25, 1] // Apple/Luxury cinematic easing
+    }
+  })
+};
+
 export default function LandingPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  });
-
-  const yBackground = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const yText = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
-  const opacityText = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-
   return (
-    <PageTransition className="flex flex-col relative w-full bg-background min-h-[150vh]" key="landing">
-      <div ref={containerRef} className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+    <PageTransition className="flex flex-col relative w-full bg-transparent min-h-[200vh]" key="landing">
+      {/* 3D WebGL Background - Persistent across scroll */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Scene />
+      </div>
+
+      {/* Hero Section */}
+      <div className="relative z-10 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
         
-        {/* Cinematic Particles */}
-        <GoldDustCanvas />
-
-        {/* Parallax Background Orbs */}
-
-        <motion.div 
-          style={{ y: yBackground }}
-          className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center opacity-40"
-        >
-          <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] rounded-full bg-primary/10 blur-[120px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[50vw] h-[50vw] rounded-full bg-accent/5 blur-[150px]" />
-        </motion.div>
-
-        {/* Hero Section */}
-        <motion.div 
-          style={{ y: yText, opacity: opacityText }}
-          className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full max-w-5xl"
-        >
-          <div className="mb-12 relative w-32 h-32 flex items-center justify-center">
-             <div className="absolute inset-0 bg-primary/5 rounded-full blur-2xl" />
-             <SvgDrawSparkle className="w-20 h-20" />
+        <div className="flex flex-col items-center justify-center text-center px-4 w-full max-w-5xl">
+          {/* Typography Motion Choreography */}
+          <div className="text-mask-container">
+            <motion.h1 
+              custom={0}
+              initial="hidden"
+              animate="visible"
+              variants={titleVariants}
+              className="font-headline text-6xl md:text-8xl lg:text-[11rem] tracking-tight leading-none text-foreground drop-shadow-2xl mix-blend-difference"
+            >
+              Sparkle
+            </motion.h1>
+          </div>
+          <div className="text-mask-container -mt-2 md:-mt-8">
+            <motion.h1 
+              custom={1}
+              initial="hidden"
+              animate="visible"
+              variants={titleVariants}
+              className="font-headline text-6xl md:text-8xl lg:text-[11rem] tracking-tight leading-none text-accent drop-shadow-2xl mix-blend-difference"
+            >
+              Studio
+            </motion.h1>
           </div>
 
-          <TextReveal 
-            text="Sparkle Studio" 
-            className="font-headline text-6xl md:text-8xl lg:text-[10rem] tracking-tight leading-none text-foreground drop-shadow-2xl"
-          />
-
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-8 text-xl md:text-2xl text-muted-foreground/80 max-w-2xl font-light tracking-wide uppercase"
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 2.5, delay: 0.8, ease: [0.25, 1, 0.25, 1] }}
+            className="mt-8 text-sm md:text-base text-muted-foreground max-w-2xl font-light tracking-[0.3em] uppercase mix-blend-difference"
           >
             Curating brilliance, one piece at a time.
           </motion.p>
           
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.8, delay: 1.2, ease: [0.25, 1, 0.25, 1] }}
+            className="mt-20 pointer-events-auto"
           >
-            <MagneticButton className="px-8 py-4 bg-primary text-primary-foreground font-semibold tracking-widest uppercase text-sm shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:shadow-[0_0_60px_rgba(212,175,55,0.4)] border border-primary/50 transition-shadow duration-500 rounded-none">
+            <MagneticButton className="px-10 py-5 bg-transparent border border-white/20 text-foreground font-medium tracking-widest uppercase text-[10px] backdrop-blur-md transition-all duration-1000 hover:border-accent hover:text-accent rounded-none hover:shadow-[0_0_40px_rgba(212,175,55,0.15)] luxury-glare-container">
               <Link href="#explore" className="w-full h-full block">Explore Collection</Link>
             </MagneticButton>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Main Content Section */}
-      <div id="explore" className="relative z-20 w-full min-h-screen bg-card py-32 px-4 flex flex-col items-center border-t border-white/5">
+      <div id="explore" className="relative z-10 w-full min-h-screen py-32 px-4 flex flex-col items-center">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-5xl"
+          viewport={{ once: true, margin: "-10%" }}
+          transition={{ duration: 1.8, ease: [0.25, 1, 0.25, 1] }}
+          className="w-full max-w-5xl backdrop-blur-md bg-black/10 border border-white/10 p-8 md:p-16 shadow-2xl pointer-events-auto"
         >
-          <div className="text-center mb-24">
-             <h2 className="font-headline text-4xl md:text-6xl text-foreground mb-6">Choose Your Path</h2>
-             <div className="w-24 h-[1px] bg-primary mx-auto opacity-50" />
+          <div className="text-center mb-24 flex flex-col items-center w-full">
+            <div className="text-mask-container">
+              <motion.h2 
+                initial={{ y: "100%", opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.5, ease: [0.25, 1, 0.25, 1] }}
+                className="font-headline text-3xl md:text-5xl text-foreground mb-6 mix-blend-difference"
+              >
+                Choose Your Path
+              </motion.h2>
+            </div>
+            <motion.div 
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 2, ease: [0.25, 1, 0.25, 1], delay: 0.2 }}
+              className="w-16 h-[1px] bg-accent mx-auto origin-center" 
+            />
           </div>
           
           <UserTypeSelection />
         </motion.div>
 
-        <footer className="mt-32 text-center text-muted-foreground/40 text-xs font-light uppercase tracking-widest">
+        <footer className="mt-40 text-center text-muted-foreground/40 text-[10px] font-light uppercase tracking-[0.2em] pointer-events-auto mix-blend-difference">
           <p>&copy; {new Date().getFullYear()} Sparkle Studio. All Rights Reserved.</p>
         </footer>
       </div>

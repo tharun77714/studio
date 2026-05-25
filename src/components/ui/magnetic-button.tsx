@@ -34,7 +34,7 @@ export function MagneticButton({ children, className, onClick }: MagneticButtonP
       onMouseMove={handleMouse}
       onMouseLeave={reset}
       animate={{ x, y }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      transition={{ type: "spring", stiffness: 40, damping: 20, mass: 0.5 }}
       className={cn(
         "relative rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
         className
