@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ScrollControls, Loader } from '@react-three/drei';
+import { ScrollControls, Loader, Html } from '@react-three/drei';
 import { EffectComposer, Bloom, DepthOfField, Noise, Vignette } from '@react-three/postprocessing';
 import { CinematicScene } from '@/components/webgl/CinematicScene';
 
@@ -14,7 +14,7 @@ export default function Home() {
         Using pointer-events-none so it doesn't block WebGL interactions
       */}
       <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-8 md:p-12 mix-blend-difference">
-        <header className="flex justify-between items-center text-zinc-100 opacity-0 animate-fade-in-delayed">
+        <header className="flex justify-between items-center text-zinc-100 transition-opacity duration-1000">
           <div className="font-mono text-xs tracking-[0.3em] uppercase">Studio / AI</div>
           <nav className="flex gap-8 text-xs tracking-widest font-medium">
             <span className="cursor-pointer pointer-events-auto hover:text-white/70 transition-colors">VISION</span>
@@ -24,10 +24,10 @@ export default function Home() {
         </header>
         
         <div className="flex justify-between items-end pb-8">
-          <h1 className="text-zinc-100 font-light tracking-tighter leading-none opacity-0 animate-fade-in-delayed" style={{ fontSize: 'clamp(3rem, 8vw, 8rem)' }}>
+          <h1 className="text-zinc-100 font-light tracking-tighter leading-none" style={{ fontSize: 'clamp(3rem, 8vw, 8rem)' }}>
             NEW<br/>SPARKLE
           </h1>
-          <div className="font-mono text-[10px] tracking-widest text-zinc-400 text-right uppercase opacity-0 animate-fade-in-delayed">
+          <div className="font-mono text-[10px] tracking-widest text-zinc-400 text-right uppercase">
             Scroll to initialize <br/> spatial environment
           </div>
         </div>
@@ -47,7 +47,11 @@ export default function Home() {
         {/* Subtle, distant cyan fog (Blade Runner atmosphere) */}
         <fog attach="fog" args={['#050810', 8, 30]} />
 
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <Html center>
+            <div className="text-white text-xs uppercase tracking-widest font-mono">Loading Space...</div>
+          </Html>
+        }>
           <ScrollControls pages={5} damping={0.15}>
             <CinematicScene />
           </ScrollControls>
