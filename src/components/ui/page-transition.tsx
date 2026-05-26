@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, forwardRef, CSSProperties } from "react";
 
 const pageVariants = {
   initial: { opacity: 0, y: 15, scale: 0.98 },
@@ -25,16 +25,23 @@ const pageVariants = {
   }
 };
 
-export function PageTransition({ children, className }: { children: ReactNode, className?: string }) {
+export const PageTransition = forwardRef<
+  HTMLDivElement,
+  { children: ReactNode; className?: string; style?: CSSProperties }
+>(({ children, className, style }, ref) => {
   return (
     <motion.div
+      ref={ref}
       initial="initial"
       animate="enter"
       exit="exit"
       variants={pageVariants}
       className={className}
+      style={style}
     >
       {children}
     </motion.div>
   );
-}
+})
+
+PageTransition.displayName = 'PageTransition';
