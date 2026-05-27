@@ -83,9 +83,9 @@ export function FlipCard({
     <motion.div
       ref={containerRef}
       initial={false}
-      animate={isSuccess ? { scale: 0.9, opacity: 0, filter: "blur(20px)" } : { scale: 1, opacity: 1, filter: "blur(0px)" }}
+      animate={isSuccess ? { scale: 0.9, opacity: 0, filter: "blur(20px)" } : { scale: 1, opacity: 1 }}
       transition={vaultTransition}
-      className={cn("relative w-full max-w-[460px] z-10", className)}
+      className={cn("relative w-full max-w-[460px] min-h-[640px] z-10", className)}
       style={{ perspective: "2000px" }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
