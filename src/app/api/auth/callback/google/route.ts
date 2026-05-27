@@ -13,11 +13,11 @@ export async function GET(request: NextRequest) {
   // Handle case where user cancelled or Google returned an error
   if (error) {
     console.error('Google OAuth error:', error);
-    return NextResponse.redirect(new URL(`/auth/individual/signin?error=${encodeURIComponent(error)}`, request.url));
+    return NextResponse.redirect(new URL(`/auth/individual?error=${encodeURIComponent(error)}`, request.url));
   }
 
   if (!code) {
-    return NextResponse.redirect(new URL('/auth/individual/signin?error=No+authorization+code+provided', request.url));
+    return NextResponse.redirect(new URL('/auth/individual?error=No+authorization+code+provided', request.url));
   }
 
   try {
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
       if (user.role !== state) {
         await auditLogCrossPortal(email, 'google', state, user.role);
         const errorMessage = getRoleMismatchErrorMessage(state);
-        return NextResponse.redirect(new URL(`/auth/${state}/signin?error=${encodeURIComponent(errorMessage)}`, request.url));
+        return NextResponse.redirect(new URL(`/auth/${state}?error=${encodeURIComponent(errorMessage)}`, request.url));
       }
 
       // Existing user: Ensure a profile document exists and has all keys safely initialized
@@ -169,6 +169,6 @@ export async function GET(request: NextRequest) {
     console.error('Google OAuth callback handler failed:', error);
     const errorMessage = error.message || 'An unexpected error occurred during Google sign in.';
     const state = searchParams.get('state') || 'individual';
-    return NextResponse.redirect(new URL(`/auth/${state}/signin?error=${encodeURIComponent(errorMessage)}`, request.url));
+    return NextResponse.redirect(new URL(`/auth/${state}?error=${encodeURIComponent(errorMessage)}`, request.url));
   }
 }
