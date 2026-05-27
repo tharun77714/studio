@@ -18,7 +18,7 @@ export default function BusinessProfilePage() {
   useEffect(() => {
     // Redirect to signin if not logged in or not a business
     if (!authLoading && (!user || profile?.role !== 'business')) {
-      router.replace('/auth/business/signin');
+      router.replace('/auth/business');
     }
   }, [user, profile, authLoading, router]);
 
