@@ -85,6 +85,7 @@ export function FlipCard({
             className="absolute inset-0 w-full h-full rounded-[32px] overflow-hidden"
             style={{
               backfaceVisibility: "hidden",
+              pointerEvents: isFlipped ? "none" : "auto",
               boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset`,
             }}
           >
@@ -124,6 +125,7 @@ export function FlipCard({
             style={{
               backfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
+              pointerEvents: isFlipped ? "auto" : "none",
               boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset`,
             }}
           >

@@ -135,7 +135,7 @@ function IndividualSignInContent() {
       if (!res.ok) throw new Error(result.error||"Invalid credentials.");
       await refreshProfile(result);
       toast({ title:"Welcome to Sparkle Studio!" });
-      router.push("/");
+      router.push("/dashboard");
     } catch(e:any) { toast({ title:"Sign In Failed", description:e.message, variant:"destructive" }); }
     finally { setIsLoading(false); }
   }
@@ -164,7 +164,7 @@ function IndividualSignInContent() {
       if (!res.ok) throw new Error(result.error);
       await refreshProfile(result);
       toast({ title:"Welcome back!" });
-      router.push("/");
+      router.push("/dashboard");
     } catch(e:any) { toast({ title:"Verification Failed", description:e.message, variant:"destructive" }); }
     finally { setIsLoading(false); }
   }
@@ -182,16 +182,10 @@ function IndividualSignInContent() {
 
   const TopHeader = () => (
     <div className="mb-8 z-20 relative">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-black/[0.05]">
-            <Sparkles className="w-5 h-5" style={{ color: ACCENT }} />
-          </div>
-          <div>
-            <div className="text-[#0a0700] text-sm font-semibold font-headline tracking-wide">Sparkle Studio</div>
-            <div className="text-[9px] font-sans tracking-[0.2em] uppercase text-[#0a0700]/60">Personal</div>
-          </div>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <Link href="/" className="flex items-center gap-1.5 text-[10px] font-sans font-semibold uppercase tracking-wider text-[#0a0700]/50 hover:text-[#0a0700] transition-colors bg-white/40 px-3 py-1.5 rounded-full border border-black/[0.05]">
+          <ArrowLeft className="w-3 h-3" /> Back
+        </Link>
         <button
           type="button"
           onClick={() => setIsFlipped(!isFlipped)}
@@ -199,6 +193,15 @@ function IndividualSignInContent() {
         >
           {isFlipped ? "Use Email" : "Use Phone"}
         </button>
+      </div>
+      <div className="flex items-center gap-2.5 mb-6">
+        <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-black/[0.05]">
+          <Sparkles className="w-5 h-5" style={{ color: ACCENT }} />
+        </div>
+        <div>
+          <div className="text-[#0a0700] text-sm font-semibold font-headline tracking-wide">Sparkle Studio</div>
+          <div className="text-[9px] font-sans tracking-[0.2em] uppercase text-[#0a0700]/60">Personal</div>
+        </div>
       </div>
       <div>
         <h1 className="font-headline text-3xl font-bold leading-tight tracking-tighter text-[#0a0700] mb-2">

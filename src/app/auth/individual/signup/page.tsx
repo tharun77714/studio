@@ -244,6 +244,12 @@ export default function IndividualSignUpPage() {
 
         {/* Content */}
         <div className="relative z-10 w-full h-full p-8 flex flex-col">
+          {/* Back Button */}
+          <div className="flex mb-6">
+            <Link href="/" className="flex items-center gap-1.5 text-[10px] font-sans font-semibold uppercase tracking-wider text-[#0a0700]/50 hover:text-[#0a0700] transition-colors bg-white/40 px-3 py-1.5 rounded-full border border-black/[0.05]">
+              <ArrowLeft className="w-3 h-3" /> Back
+            </Link>
+          </div>
           {/* Logo */}
           <div className="flex items-center gap-2.5 mb-8">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-black/[0.05]">
