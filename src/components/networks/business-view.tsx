@@ -135,7 +135,7 @@ export function BusinessNetworkView() {
   
   useEffect(() => {
     if (!authLoading && (!user || profile?.role !== 'business')) {
-      router.replace('/auth/business');
+      router.replace('/auth/business/signin');
     }
     if (user && profile && profile.role === 'business') {
       profileForm.reset({

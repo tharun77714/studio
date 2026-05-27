@@ -19,7 +19,6 @@ interface OrbConfig {
 
 interface AuroraBackgroundProps {
   variant: "gold" | "violet";
-  isSuccess?: boolean;
   className?: string;
 }
 
@@ -39,7 +38,7 @@ const VIOLET_COLORS = [
   "radial-gradient(circle, rgba(232,121,249,0.28) 0%, rgba(167,139,250,0.12) 60%, transparent 85%)",
 ];
 
-export function AuroraBackground({ variant, isSuccess = false, className = "" }: AuroraBackgroundProps) {
+export function AuroraBackground({ variant, className = "" }: AuroraBackgroundProps) {
   const colors = variant === "gold" ? GOLD_COLORS : VIOLET_COLORS;
 
   const orbs: OrbConfig[] = useMemo(() => [
@@ -118,16 +117,12 @@ export function AuroraBackground({ variant, isSuccess = false, className = "" }:
       {/* Deep dark base */}
       <div className="absolute inset-0 bg-[#030303]" />
 
-      {/* Cinematic vignette with subtle breathing */}
-      <motion.div
+      {/* Cinematic vignette */}
+      <div
         className="absolute inset-0 z-10"
-        animate={{ 
-          opacity: isSuccess ? 0.8 : [0.65, 0.75, 0.65],
-          backdropFilter: isSuccess ? "blur(30px)" : "blur(0px)" 
-        }}
-        transition={{ duration: isSuccess ? 1 : 12, repeat: isSuccess ? 0 : Infinity, ease: "easeInOut" }}
         style={{
-          background: "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%)",
+          background:
+            "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%)",
         }}
       />
 

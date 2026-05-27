@@ -69,7 +69,7 @@ export default function IndividualProfilePage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.replace('/auth/individual');
+      router.replace('/auth/individual/signin');
     }
     if (profile && profile.role === 'individual') {
       form.reset({

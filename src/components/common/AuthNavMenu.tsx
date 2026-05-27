@@ -33,12 +33,12 @@ export function AuthNavMenu({ isCollapsed }: { isCollapsed?: boolean }) {
     return (
       <div className={cn("flex gap-2", isCollapsed ? "flex-col items-center" : "items-center")}>
          <Button variant="outline" size="sm" asChild className={cn(isCollapsed && "h-10 w-10 p-0 rounded-full")}>
-            <Link href="/auth/individual" title="Client Sign In">
+            <Link href="/auth/individual/signin" title="Client Sign In">
                 <User className={cn("h-4 w-4", !isCollapsed && "mr-1 md:mr-2")}/> <span className={cn("hidden md:inline", isCollapsed && "md:hidden")}>Client Sign In</span>
             </Link>
          </Button>
          <Button variant="default" size="sm" asChild className={cn("btn-primary-sparkle", isCollapsed && "h-10 w-10 p-0 rounded-full")}>
-            <Link href="/auth/business" title="Business Sign In">
+            <Link href="/auth/business/signin" title="Business Sign In">
                 <Briefcase className={cn("h-4 w-4", !isCollapsed && "mr-1 md:mr-2")}/> <span className={cn("hidden md:inline", isCollapsed && "md:hidden")}>Business Sign In</span>
             </Link>
          </Button>
