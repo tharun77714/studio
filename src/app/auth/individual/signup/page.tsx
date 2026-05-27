@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import dynamic from "next/dynamic";
+import React from "react";
 import {
   Loader2, User, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft,
   MapPin, Phone, CheckCircle, Sparkles, Gem,
@@ -17,11 +18,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { PhoneInput } from "@/components/common/phone-input";
 import { AuroraBackground } from "@/components/auth/visuals/AuroraBackground";
-import { AnimatedInput } from "@/components/auth/inputs/AnimatedInput";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const ACCENT = "hsl(262 83% 68%)";
+const ACCENT = "hsl(262 83% 58%)"; // Rich violet
 const ACCENT_RGB = "139,92,246";
 
 const DynamicAddressAutocompleteInput = dynamic(
@@ -47,49 +47,45 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-// ─── Shimmer Button ──────────────────────────────────────────────────────────
-function ShimmerButton({
-  children, onClick, disabled, type = "button", variant = "primary",
-}: {
-  children: React.ReactNode; onClick?: () => void; disabled?: boolean;
-  type?: "button" | "submit"; variant?: "primary" | "ghost";
-}) {
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
-  const ref = useRef<HTMLButtonElement>(null);
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled) return;
-    const rect = ref.current?.getBoundingClientRect();
-    if (rect) {
-      const id = Date.now();
-      setRipples((p) => [...p, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
-      setTimeout(() => setRipples((p) => p.filter((r) => r.id !== id)), 700);
-    }
-    onClick?.();
-  };
+// ─── Minimal Luxury Input ───────────────────────────────────────────────────
+const LuxuryInput = React.forwardRef<HTMLInputElement, any>(({ label, icon, error, ...props }, ref) => {
+  return (
+    <div className="space-y-1.5 relative group">
+      <div className="flex items-center gap-2 px-1">
+        <span className="text-[10px] font-sans tracking-[0.15em] uppercase text-neutral-500 font-semibold">{label}</span>
+      </div>
+      <div className="relative">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-[#0a0700] transition-colors">
+          {icon}
+        </div>
+        <input
+          ref={ref}
+          {...props}
+          className={`w-full bg-black/[0.02] border ${error ? "border-red-400" : "border-black/[0.08]"} rounded-xl py-3 pl-10 pr-10 text-[14px] font-sans text-[#0a0700] placeholder:text-neutral-400/80 outline-none transition-all duration-300 focus:bg-white/50 focus:border-[${ACCENT}] focus:ring-4 focus:ring-[${ACCENT}]/10 shadow-[0_2px_10px_rgba(0,0,0,0.01)_inset]`}
+        />
+        {props.rightElement && (
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+            {props.rightElement}
+          </div>
+        )}
+      </div>
+      {error && <p className="text-[10px] text-red-500 pl-1">{error}</p>}
+    </div>
+  );
+});
+LuxuryInput.displayName = "LuxuryInput";
+
+// ─── Luxury Button ────────────────────────────────────────────────────────
+function LuxuryBtn({ children, onClick, disabled, type = "button", variant = "primary" }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; type?: "button" | "submit"; variant?: "primary" | "ghost" }) {
   return (
     <motion.button
-      ref={ref} type={type} disabled={disabled} onClick={handleClick}
-      whileHover={disabled ? {} : { scale: 1.015, y: -1 }}
-      whileTap={disabled ? {} : { scale: 0.97 }}
-      className="relative h-12 w-full rounded-xl font-sans font-semibold text-[13px] overflow-hidden cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 px-5"
-      style={
-        variant === "primary"
-          ? { background: `linear-gradient(135deg, rgba(${ACCENT_RGB},0.9), rgba(${ACCENT_RGB},0.65))`, color: "#ffffff", boxShadow: `0 6px 28px rgba(${ACCENT_RGB},0.35),0 1px 0 rgba(255,255,255,0.12) inset` }
-          : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "#ffffff" }
-      }
+      type={type} disabled={disabled} onClick={onClick}
+      whileHover={disabled ? {} : { scale: 1.02 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
+      className={`relative w-full h-12 rounded-xl font-sans font-semibold text-[13px] overflow-hidden cursor-pointer flex items-center justify-center gap-2 group disabled:opacity-50 ${variant === "primary" ? "shadow-[0_8px_30px_rgba(0,0,0,0.12)]" : ""}`}
+      style={variant === "primary" ? { background: "#0a0700", color: "#ffffff" } : { background: "rgba(0,0,0,0.04)", color: "#0a0700", border: "1px solid rgba(0,0,0,0.1)" }}
     >
-      {variant === "primary" && (
-        <motion.div className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%)", backgroundSize: "200% 100%" }}
-          initial={{ backgroundPosition: "200% 0" }}
-          whileHover={{ backgroundPosition: ["-200% 0", "200% 0"] }}
-          transition={{ duration: 0.6 }} />
-      )}
-      {ripples.map((r) => (
-        <motion.span key={r.id} className="absolute rounded-full pointer-events-none"
-          style={{ left: r.x, top: r.y, width: 8, height: 8, marginLeft: -4, marginTop: -4, background: variant === "primary" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.1)" }}
-          initial={{ scale: 0, opacity: 0.9 }} animate={{ scale: 22, opacity: 0 }} transition={{ duration: 0.65, ease: "easeOut" }} />
-      ))}
+      {variant === "primary" && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />}
       <span className="relative z-10 flex items-center gap-2">{children}</span>
     </motion.button>
   );
@@ -104,7 +100,7 @@ const STEPS = [
 
 function StepProgress({ step }: { step: number }) {
   return (
-    <div className="flex items-center mb-8">
+    <div className="flex items-center gap-0 mb-8">
       {STEPS.map((s, i) => {
         const done = i < step;
         const active = i === step;
@@ -114,8 +110,8 @@ function StepProgress({ step }: { step: number }) {
             <div className="flex flex-col items-center gap-1.5">
               <motion.div
                 animate={{
-                  background: done ? `rgba(${ACCENT_RGB},0.9)` : active ? `rgba(${ACCENT_RGB},0.15)` : "rgba(255,255,255,0.06)",
-                  borderColor: done || active ? `rgba(${ACCENT_RGB},0.7)` : "rgba(255,255,255,0.12)",
+                  background: done ? "#0a0700" : active ? "rgba(0,0,0,0.05)" : "transparent",
+                  borderColor: done || active ? "#0a0700" : "rgba(0,0,0,0.1)",
                 }}
                 transition={{ duration: 0.3 }}
                 className="w-9 h-9 rounded-full border flex items-center justify-center"
@@ -123,19 +119,23 @@ function StepProgress({ step }: { step: number }) {
                 {done ? (
                   <CheckCircle className="w-4 h-4 text-white" />
                 ) : (
-                  <Icon className="w-4 h-4" style={{ color: active ? ACCENT : "rgba(107,114,128,1)" }} />
+                  <Icon className="w-4 h-4" style={{ color: active ? "#0a0700" : "rgba(0,0,0,0.4)" }} />
                 )}
               </motion.div>
-              <span className="text-[10px] font-sans tracking-wide" style={{ color: active ? ACCENT : done ? "rgba(255,255,255,0.6)" : "rgba(107,114,128,0.8)" }}>
+              <span
+                className="text-[10px] font-sans tracking-wide font-medium"
+                style={{ color: active ? "#0a0700" : done ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)" }}
+              >
                 {s.label}
               </span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className="flex-1 h-px mx-2 mb-4 relative overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-                <motion.div className="absolute inset-y-0 left-0 rounded-full"
-                  style={{ background: ACCENT }}
+              <div className="flex-1 h-px mx-2 mb-4 relative overflow-hidden rounded-full bg-black/10">
+                <motion.div
+                  className="absolute inset-y-0 left-0 rounded-full bg-[#0a0700]"
                   animate={{ width: done ? "100%" : "0%" }}
-                  transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }} />
+                  transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                />
               </div>
             )}
           </div>
@@ -147,9 +147,9 @@ function StepProgress({ step }: { step: number }) {
 
 // ─── Slide variants ───────────────────────────────────────────────────────────
 const slide = (dir: number) => ({
-  initial: { x: dir * 60, opacity: 0, rotateY: dir * 8, filter: "blur(4px)" },
+  initial: { x: dir * 40, opacity: 0, rotateY: dir * 4, filter: "blur(4px)" },
   animate: { x: 0, opacity: 1, rotateY: 0, filter: "blur(0px)", transition: { duration: 0.38, ease: [0.25, 0.1, 0.25, 1] } },
-  exit: { x: dir * -60, opacity: 0, rotateY: dir * -8, filter: "blur(4px)", transition: { duration: 0.26 } },
+  exit: { x: dir * -40, opacity: 0, rotateY: dir * -4, filter: "blur(4px)", transition: { duration: 0.26 } },
 });
 
 export default function IndividualSignUpPage() {
@@ -211,267 +211,233 @@ export default function IndividualSignUpPage() {
 
   const w = form.watch();
 
+  const metallicBase = `linear-gradient(145deg, rgba(${ACCENT_RGB}, 0.8) 0%, rgba(${ACCENT_RGB}, 0.4) 50%, rgba(10,10,10,0.9) 100%)`;
+  const noiseTexture = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E")`;
+
   return (
-    <div className="relative w-full min-h-screen flex items-center justify-center p-4">
+    <div className="relative w-full min-h-screen flex items-center justify-center p-4 selection:bg-[#0a0700] selection:text-white">
       {/* Full-screen aurora */}
       <AuroraBackground variant="violet" className="fixed" />
 
-      {/* Centered card */}
+      {/* Cinematic Diagonal Card Shell */}
       <motion.div
         initial={{ opacity: 0, y: 24, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-        className="relative z-10 w-full max-w-[480px] my-8"
-        style={{ perspective: "1000px" }}
+        className="relative z-10 w-full max-w-[460px] my-8 min-h-[600px] rounded-[32px] overflow-hidden"
+        style={{
+          boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset`,
+        }}
       >
+        {/* Background Layers */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: metallicBase }}>
+          <div className="absolute inset-0 mix-blend-overlay" style={{ backgroundImage: noiseTexture }} />
+        </div>
         <div
-          className="relative rounded-3xl overflow-hidden"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background: "rgba(8,5,18,0.75)",
-            backdropFilter: "blur(28px) saturate(1.4)",
-            border: "1px solid rgba(139,92,246,0.2)",
-            boxShadow: `0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.04) inset,0 1px 0 rgba(139,92,246,0.22) inset`,
+            background: "rgba(255,255,255,0.92)",
+            backdropFilter: "blur(20px)",
+            clipPath: "polygon(0 0, 100% 0, 0 100%)",
           }}
-        >
-          {/* Top violet rim */}
-          <div className="absolute top-0 inset-x-0 h-[1.5px]"
-            style={{ background: `linear-gradient(90deg,transparent,rgba(${ACCENT_RGB},0.7),transparent)` }} />
+        />
 
-          <div className="px-8 pt-9 pb-8">
-            {/* Logo */}
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
-              className="flex items-center gap-2.5 mb-8">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: `rgba(${ACCENT_RGB},0.12)`, border: `1px solid rgba(${ACCENT_RGB},0.28)` }}>
-                <Gem className="w-4.5 h-4.5" style={{ color: ACCENT }} />
-              </div>
-              <div>
-                <div className="text-white text-sm font-semibold font-headline tracking-wide">Sparkle Studio</div>
-                <div className="text-[10px] font-sans tracking-[0.15em] uppercase" style={{ color: `rgba(${ACCENT_RGB},0.65)` }}>Personal Account</div>
-              </div>
-            </motion.div>
-
-            {/* Heading */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }} className="mb-7">
-              <h1 className="font-headline text-[28px] font-bold leading-tight tracking-tight mb-1.5"
-                style={{ background: `linear-gradient(160deg,#fff 0%,rgba(255,255,255,0.7) 55%,rgba(${ACCENT_RGB},0.65) 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Join Sparkle Studio
-              </h1>
-              <p className="text-neutral-500 text-sm font-sans">Discover luxury jewelry in 3 easy steps</p>
-            </motion.div>
-
-            {/* Step progress */}
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.35 }}>
-              <StepProgress step={step} />
-            </motion.div>
-
-            {/* ── Sliding step content ── */}
-            <div style={{ perspective: "900px" }}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <AnimatePresence mode="wait" custom={dir}>
-                  {/* ── Step 0: Account Info ── */}
-                  {step === 0 && (
-                    <motion.div key="step0" custom={dir}
-                      variants={{ initial: slide(dir).initial, animate: slide(1).animate, exit: slide(dir).exit }}
-                      initial="initial" animate="animate" exit="exit"
-                      style={{ transformStyle: "preserve-3d" }}
-                      className="space-y-4"
-                    >
-                      <AnimatedInput
-                        label="Full Name"
-                        icon={<User className="w-4 h-4" />}
-                        accentColor={ACCENT} accentRgb={ACCENT_RGB}
-                        placeholder="e.g. Alex Smith"
-                        error={form.formState.errors.fullName?.message}
-                        {...form.register("fullName")}
-                      />
-                      <AnimatedInput
-                        label="Email Address"
-                        type="email"
-                        icon={<Mail className="w-4 h-4" />}
-                        accentColor={ACCENT} accentRgb={ACCENT_RGB}
-                        placeholder="you@example.com"
-                        error={form.formState.errors.email?.message}
-                        {...form.register("email")}
-                      />
-                      <AnimatedInput
-                        label="Password"
-                        type={showPw ? "text" : "password"}
-                        icon={<Lock className="w-4 h-4" />}
-                        accentColor={ACCENT} accentRgb={ACCENT_RGB}
-                        placeholder="Min. 8 characters"
-                        error={form.formState.errors.password?.message}
-                        rightElement={
-                          <button type="button" onClick={() => setShowPw(!showPw)} className="text-neutral-400 hover:text-white transition-colors">
-                            {showPw ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                          </button>
-                        }
-                        {...form.register("password")}
-                      />
-                      <AnimatedInput
-                        label="Confirm Password"
-                        type={showCPw ? "text" : "password"}
-                        icon={<Lock className="w-4 h-4" />}
-                        accentColor={ACCENT} accentRgb={ACCENT_RGB}
-                        placeholder="Re-enter password"
-                        error={form.formState.errors.confirmPassword?.message}
-                        rightElement={
-                          <button type="button" onClick={() => setShowCPw(!showCPw)} className="text-neutral-400 hover:text-white transition-colors">
-                            {showCPw ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                          </button>
-                        }
-                        {...form.register("confirmPassword")}
-                      />
-                      <div className="pt-2">
-                        <ShimmerButton onClick={goNext} type="button" variant="primary">
-                          <span>Continue</span> <ArrowRight className="w-4 h-4" />
-                        </ShimmerButton>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* ── Step 1: Personal Details ── */}
-                  {step === 1 && (
-                    <motion.div key="step1" custom={dir}
-                      variants={{ initial: slide(dir).initial, animate: slide(1).animate, exit: slide(dir).exit }}
-                      initial="initial" animate="animate" exit="exit"
-                      style={{ transformStyle: "preserve-3d" }}
-                      className="space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-sans text-neutral-400 tracking-[0.12em] uppercase pl-1 flex items-center gap-1.5">
-                          <Phone className="w-3.5 h-3.5" style={{ color: ACCENT }} /> Phone Number
-                        </label>
-                        <div className="rounded-xl overflow-hidden" style={{ border: "1.5px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
-                          <PhoneInput
-                            value={phoneValue}
-                            onChange={(v) => {
-                              setPhoneValue(v ?? "");
-                              form.setValue("individualPhoneNumber", v ?? "", { shouldValidate: true });
-                            }}
-                            placeholder="Enter phone number"
-                            className="bg-transparent border-none text-white px-4 py-3.5 text-[15px] font-sans outline-none w-full"
-                          />
-                        </div>
-                        {form.formState.errors.individualPhoneNumber && (
-                          <p className="text-xs text-red-400 pl-1">{form.formState.errors.individualPhoneNumber.message}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-sans text-neutral-400 tracking-[0.12em] uppercase pl-1 flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5" style={{ color: ACCENT }} /> Shipping Address{" "}
-                          <span className="text-neutral-600 font-medium normal-case tracking-normal ml-1">(Optional)</span>
-                        </label>
-                        <div className="rounded-xl overflow-hidden" style={{ border: "1.5px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
-                          <DynamicAddressAutocompleteInput
-                            onPlaceSelectedAction={handlePlaceSelected}
-                            initialValue={w.defaultShippingAddressText}
-                            placeholder="Search your shipping address"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setIsMapOpen(true)}
-                          className="flex items-center justify-center gap-2 text-xs font-sans transition-colors px-3 py-2.5 rounded-lg w-full"
-                          style={{ color: `rgba(${ACCENT_RGB},0.85)`, background: `rgba(${ACCENT_RGB},0.06)`, border: `1px solid rgba(${ACCENT_RGB},0.15)` }}
-                        >
-                          <MapPin className="w-3.5 h-3.5" /> Pick location on map
-                        </button>
-                      </div>
-
-                      <AnimatedInput
-                        label="Pincode (Optional)"
-                        icon={<MapPin className="w-4 h-4" />}
-                        accentColor={ACCENT} accentRgb={ACCENT_RGB}
-                        placeholder="Enter your pincode"
-                        {...form.register("defaultShippingAddressPincode")}
-                      />
-
-                      <div className="flex gap-3 pt-2">
-                        <div className="w-1/3">
-                          <ShimmerButton onClick={goBack} type="button" variant="ghost">
-                            <ArrowLeft className="w-4 h-4" /> <span>Back</span>
-                          </ShimmerButton>
-                        </div>
-                        <div className="w-2/3">
-                          <ShimmerButton onClick={goNext} type="button" variant="primary">
-                            <span>Continue</span> <ArrowRight className="w-4 h-4" />
-                          </ShimmerButton>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* ── Step 2: Confirmation ── */}
-                  {step === 2 && (
-                    <motion.div key="step2" custom={dir}
-                      variants={{ initial: slide(dir).initial, animate: slide(1).animate, exit: slide(dir).exit }}
-                      initial="initial" animate="animate" exit="exit"
-                      style={{ transformStyle: "preserve-3d" }}
-                      className="space-y-5"
-                    >
-                      {/* Summary */}
-                      <div className="rounded-xl p-5 space-y-3"
-                        style={{ background: `rgba(${ACCENT_RGB},0.04)`, border: `1px solid rgba(${ACCENT_RGB},0.12)` }}>
-                        <p className="text-[10px] text-neutral-500 font-sans uppercase tracking-widest flex items-center gap-1.5 mb-1">
-                          <Sparkles className="w-3 h-3" style={{ color: ACCENT }} /> Your Account Summary
-                        </p>
-                        {[
-                          { label: "Name", value: w.fullName },
-                          { label: "Email", value: w.email },
-                          { label: "Phone", value: w.individualPhoneNumber || phoneValue || "—" },
-                          { label: "Address", value: w.defaultShippingAddressText || "Not provided" },
-                        ].map((row) => (
-                          <div key={row.label} className="flex items-start justify-between text-xs font-sans gap-4">
-                            <span className="text-neutral-500 shrink-0">{row.label}</span>
-                            <span className="text-neutral-300 text-right truncate max-w-[70%] font-medium">{row.value || "—"}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Benefits */}
-                      <div className="space-y-2.5">
-                        {["Discover 50,000+ authenticated pieces", "Expert certification on every item", "Free returns within 30 days"].map((b) => (
-                          <div key={b} className="flex items-center gap-2.5 text-xs font-sans text-neutral-400">
-                            <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `rgba(${ACCENT_RGB},0.15)` }}>
-                              <div className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT }} />
-                            </div>
-                            {b}
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex gap-3 pt-2">
-                        <div className="w-1/3">
-                          <ShimmerButton onClick={goBack} type="button" variant="ghost">
-                            <ArrowLeft className="w-4 h-4" /> <span>Back</span>
-                          </ShimmerButton>
-                        </div>
-                        <div className="w-2/3">
-                          <ShimmerButton type="submit" disabled={isLoading} variant="primary">
-                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>Create Account</span> <Sparkles className="w-4 h-4" /></>}
-                          </ShimmerButton>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </form>
+        {/* Content */}
+        <div className="relative z-10 w-full h-full p-8 flex flex-col">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5 mb-8">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-black/[0.05]">
+              <Gem className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
+            <div>
+              <div className="text-[#0a0700] text-sm font-semibold font-headline tracking-wide">Sparkle Studio</div>
+              <div className="text-[9px] font-sans tracking-[0.2em] uppercase text-[#0a0700]/60">Personal Account</div>
+            </div>
+          </div>
 
-            {/* Footer */}
-            <p className="text-center text-sm text-neutral-500 font-sans mt-8">
+          {/* Heading */}
+          <div className="mb-8">
+            <h1 className="font-headline text-3xl font-bold leading-tight tracking-tighter text-[#0a0700] mb-2">
+              Join Sparkle
+            </h1>
+            <p className="text-[#0a0700]/60 text-[13px] font-sans font-medium">Discover luxury jewelry in 3 steps</p>
+          </div>
+
+          {/* Step progress */}
+          <StepProgress step={step} />
+
+          {/* ── Sliding step content ── */}
+          <div className="flex-1" style={{ perspective: "900px" }}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <AnimatePresence mode="wait" custom={dir}>
+                {/* ── Step 0: Account Info ── */}
+                {step === 0 && (
+                  <motion.div key="step0" custom={dir}
+                    variants={{ initial: slide(dir).initial, animate: slide(1).animate, exit: slide(dir).exit }}
+                    initial="initial" animate="animate" exit="exit"
+                    style={{ transformStyle: "preserve-3d" }}
+                    className="space-y-4"
+                  >
+                    <LuxuryInput
+                      label="Full Name" icon={<User className="w-4 h-4" />}
+                      placeholder="e.g. Alex Smith" error={form.formState.errors.fullName?.message}
+                      {...form.register("fullName")}
+                    />
+                    <LuxuryInput
+                      label="Email Address" type="email" icon={<Mail className="w-4 h-4" />}
+                      placeholder="you@example.com" error={form.formState.errors.email?.message}
+                      {...form.register("email")}
+                    />
+                    <LuxuryInput
+                      label="Password" type={showPw ? "text" : "password"} icon={<Lock className="w-4 h-4" />}
+                      placeholder="Min. 8 characters" error={form.formState.errors.password?.message}
+                      rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[#0a0700]/50 hover:text-[#0a0700] transition-colors">{showPw ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}</button>}
+                      {...form.register("password")}
+                    />
+                    <LuxuryInput
+                      label="Confirm Password" type={showCPw ? "text" : "password"} icon={<Lock className="w-4 h-4" />}
+                      placeholder="Re-enter password" error={form.formState.errors.confirmPassword?.message}
+                      rightElement={<button type="button" onClick={() => setShowCPw(!showCPw)} className="text-[#0a0700]/50 hover:text-[#0a0700] transition-colors">{showCPw ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}</button>}
+                      {...form.register("confirmPassword")}
+                    />
+                    <div className="pt-2">
+                      <LuxuryBtn onClick={goNext} type="button" variant="primary">
+                        <span>Continue</span> <ArrowRight className="w-4 h-4" />
+                      </LuxuryBtn>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* ── Step 1: Personal Details ── */}
+                {step === 1 && (
+                  <motion.div key="step1" custom={dir}
+                    variants={{ initial: slide(dir).initial, animate: slide(1).animate, exit: slide(dir).exit }}
+                    initial="initial" animate="animate" exit="exit"
+                    style={{ transformStyle: "preserve-3d" }}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-sans tracking-[0.15em] uppercase text-neutral-500 font-semibold pl-1 flex items-center gap-1.5">
+                        Phone Number
+                      </label>
+                      <div className="bg-black/[0.02] border border-black/[0.08] rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.01)_inset] focus-within:bg-white/50 focus-within:border-[#0a0700]/20 transition-all">
+                        <PhoneInput
+                          value={phoneValue}
+                          onChange={(v) => { setPhoneValue(v ?? ""); form.setValue("individualPhoneNumber", v ?? "", { shouldValidate: true }); }}
+                          placeholder="Enter phone number"
+                          className="bg-transparent border-none text-[#0a0700] px-4 py-3.5 text-[15px] font-sans outline-none w-full placeholder:text-neutral-400"
+                        />
+                      </div>
+                      {form.formState.errors.individualPhoneNumber && (
+                        <p className="text-[10px] text-red-500 pl-1">{form.formState.errors.individualPhoneNumber.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-sans tracking-[0.15em] uppercase text-neutral-500 font-semibold pl-1 flex items-center gap-1.5">
+                        Shipping Address <span className="text-neutral-400 font-medium normal-case tracking-normal ml-1">(Optional)</span>
+                      </label>
+                      <div className="bg-black/[0.02] border border-black/[0.08] rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.01)_inset] focus-within:bg-white/50 focus-within:border-[#0a0700]/20 transition-all">
+                        <DynamicAddressAutocompleteInput
+                          onPlaceSelectedAction={handlePlaceSelected}
+                          initialValue={w.defaultShippingAddressText}
+                          placeholder="Search your address"
+                        />
+                      </div>
+                      <button
+                        type="button" onClick={() => setIsMapOpen(true)}
+                        className="flex items-center justify-center gap-2 text-[11px] font-sans font-semibold transition-colors px-3 py-2.5 rounded-lg w-full text-[#0a0700]/70 bg-black/[0.03] hover:bg-black/[0.05] border border-black/[0.05]"
+                      >
+                        <MapPin className="w-3.5 h-3.5" /> Pick location on map
+                      </button>
+                    </div>
+
+                    <LuxuryInput
+                      label="Pincode (Optional)" icon={<MapPin className="w-4 h-4" />}
+                      placeholder="Enter pincode" error={form.formState.errors.defaultShippingAddressPincode?.message}
+                      {...form.register("defaultShippingAddressPincode")}
+                    />
+
+                    <div className="flex gap-3 pt-2">
+                      <div className="w-1/3">
+                        <LuxuryBtn onClick={goBack} type="button" variant="ghost">
+                          <ArrowLeft className="w-4 h-4" />
+                        </LuxuryBtn>
+                      </div>
+                      <div className="w-2/3">
+                        <LuxuryBtn onClick={goNext} type="button" variant="primary">
+                          <span>Continue</span> <ArrowRight className="w-4 h-4" />
+                        </LuxuryBtn>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* ── Step 2: Confirmation ── */}
+                {step === 2 && (
+                  <motion.div key="step2" custom={dir}
+                    variants={{ initial: slide(dir).initial, animate: slide(1).animate, exit: slide(dir).exit }}
+                    initial="initial" animate="animate" exit="exit"
+                    style={{ transformStyle: "preserve-3d" }}
+                    className="space-y-5"
+                  >
+                    {/* Summary */}
+                    <div className="rounded-xl p-5 space-y-3 bg-black/[0.03] border border-black/[0.06]">
+                      <p className="text-[9px] text-[#0a0700]/50 font-sans uppercase tracking-widest flex items-center gap-1.5 mb-1 font-bold">
+                        <Sparkles className="w-3 h-3" style={{ color: ACCENT }} /> Account Summary
+                      </p>
+                      {[
+                        { label: "Name", value: w.fullName },
+                        { label: "Email", value: w.email },
+                        { label: "Phone", value: w.individualPhoneNumber || phoneValue || "—" },
+                        { label: "Address", value: w.defaultShippingAddressText || "Not provided" },
+                      ].map((row) => (
+                        <div key={row.label} className="flex items-start justify-between text-[11px] font-sans gap-4 font-medium">
+                          <span className="text-[#0a0700]/50 shrink-0">{row.label}</span>
+                          <span className="text-[#0a0700] text-right truncate max-w-[70%]">{row.value || "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Benefits */}
+                    <div className="space-y-2.5">
+                      {["Discover 50,000+ authenticated pieces", "Expert certification on every item", "Free returns within 30 days"].map((b) => (
+                        <div key={b} className="flex items-center gap-2.5 text-[11px] font-sans font-medium text-[#0a0700]/70">
+                          <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 border border-black/[0.05]" style={{ background: `rgba(${ACCENT_RGB},0.15)` }}>
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT }} />
+                          </div>
+                          {b}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <div className="w-1/3">
+                        <LuxuryBtn onClick={goBack} type="button" variant="ghost">
+                          <ArrowLeft className="w-4 h-4" />
+                        </LuxuryBtn>
+                      </div>
+                      <div className="w-2/3">
+                        <LuxuryBtn type="submit" disabled={isLoading} variant="primary">
+                          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>Create Account</span> <Sparkles className="w-4 h-4" /></>}
+                        </LuxuryBtn>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </form>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center pt-4">
+            <p className="text-[12px] font-sans text-[#0a0700]/70 font-medium">
               Already have an account?{" "}
-              <Link href="/auth/individual/signin" className="font-semibold hover:opacity-80 transition-opacity" style={{ color: ACCENT }}>
+              <Link href="/auth/individual/signin" className="text-[#0a0700] font-bold hover:underline">
                 Sign In
               </Link>
             </p>
           </div>
-
-          {/* Bottom violet rim */}
-          <div className="absolute bottom-0 inset-x-0 h-[1px]"
-            style={{ background: `linear-gradient(90deg,transparent,rgba(${ACCENT_RGB},0.3),transparent)` }} />
         </div>
       </motion.div>
 
