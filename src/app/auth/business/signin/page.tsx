@@ -17,7 +17,7 @@ import { AuroraBackground } from "@/components/auth/visuals/AuroraBackground";
 import { FlipCard } from "@/components/auth/layout/FlipCard";
 import { OTPInput } from "@/components/auth/inputs/OTPInput";
 
-const ACCENT = "hsl(43 74% 45%)"; // Darker gold for light background contrast
+const ACCENT = "hsl(43 74% 66%)"; // Champagne Gold
 const ACCENT_RGB = "212,175,55";
 
 const emailSchema = z.object({
@@ -35,7 +35,7 @@ type EmailForm = z.infer<typeof emailSchema>;
 // ─── Minimal Luxury Input ───────────────────────────────────────────────────
 const LuxuryInput = React.forwardRef<HTMLInputElement, any>(({ label, icon, error, ...props }, ref) => {
   return (
-    <div className="space-y-1.5 relative group">
+    <div className="space-y-1.5 relative group z-20">
       <div className="flex items-center gap-2 px-1">
         <span className="text-[10px] font-sans tracking-[0.15em] uppercase text-neutral-500 font-semibold">{label}</span>
       </div>
@@ -46,10 +46,13 @@ const LuxuryInput = React.forwardRef<HTMLInputElement, any>(({ label, icon, erro
         <input
           ref={ref}
           {...props}
-          className={`w-full bg-black/[0.02] border ${error ? "border-red-400" : "border-black/[0.08]"} rounded-xl py-3 pl-10 pr-10 text-[14px] font-sans text-[#0a0700] placeholder:text-neutral-400/80 outline-none transition-all duration-300 focus:bg-white/50 focus:border-[${ACCENT}] focus:ring-4 focus:ring-[${ACCENT}]/10 shadow-[0_2px_10px_rgba(0,0,0,0.01)_inset]`}
+          style={{
+            borderColor: error ? "rgba(248,113,113,1)" : "rgba(0,0,0,0.08)",
+          }}
+          className={`w-full bg-black/[0.02] border rounded-xl py-3 pl-10 pr-10 text-[14px] font-sans text-[#0a0700] placeholder:text-neutral-400/80 outline-none transition-all duration-300 focus:bg-white/50 shadow-[0_2px_10px_rgba(0,0,0,0.01)_inset] focus:border-[${ACCENT}] focus:ring-4 focus:ring-[${ACCENT}]/10 relative z-20`}
         />
         {props.rightElement && (
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 z-30">
             {props.rightElement}
           </div>
         )}
@@ -67,7 +70,7 @@ function LuxuryBtn({ children, onClick, disabled, type = "button" }: { children:
       type={type} disabled={disabled} onClick={onClick}
       whileHover={disabled ? {} : { scale: 1.02 }}
       whileTap={disabled ? {} : { scale: 0.98 }}
-      className="relative w-full h-12 rounded-xl font-sans font-semibold text-[13px] overflow-hidden cursor-pointer flex items-center justify-center gap-2 group shadow-[0_8px_30px_rgba(0,0,0,0.12)] disabled:opacity-50"
+      className="relative w-full h-12 rounded-xl font-sans font-semibold text-[13px] overflow-hidden cursor-pointer flex items-center justify-center gap-2 group shadow-[0_8px_30px_rgba(0,0,0,0.12)] disabled:opacity-50 z-20"
       style={{
         background: "#0a0700",
         color: "#ffffff",
@@ -178,7 +181,7 @@ function BusinessSignInContent() {
   };
 
   const TopHeader = () => (
-    <div className="mb-8">
+    <div className="mb-8 z-20 relative">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-black/[0.05]">
@@ -209,7 +212,7 @@ function BusinessSignInContent() {
   );
 
   const FrontContent = (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex-1 flex flex-col h-full z-20 relative">
       <TopHeader />
       <div className="flex-1">
         <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
@@ -221,25 +224,25 @@ function BusinessSignInContent() {
           <LuxuryInput
             label="Password" type={showPw?"text":"password"} icon={<Lock className="w-4 h-4"/>}
             placeholder="••••••••" error={emailForm.formState.errors.password?.message}
-            rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[#0a0700]/50 hover:text-[#0a0700] transition-colors">{showPw?<Eye className="w-4 h-4"/>:<EyeOff className="w-4 h-4"/>}</button>}
+            rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[#0a0700]/50 hover:text-[#0a0700] transition-colors"><div className="p-2">{showPw?<Eye className="w-4 h-4"/>:<EyeOff className="w-4 h-4"/>}</div></button>}
             {...emailForm.register("password")}
           />
-          <div className="flex justify-end pt-1 pb-4">
-            <Link href="/auth/forgot-password" className="text-[11px] font-sans font-semibold text-[#0a0700]/60 hover:text-[#0a0700] transition-colors">Forgot password?</Link>
+          <div className="flex justify-end pt-1 pb-4 z-20 relative">
+            <Link href="/auth/forgot-password" className="text-[11px] font-sans font-semibold text-[#0a0700]/60 hover:text-[#0a0700] transition-colors relative z-20">Forgot password?</Link>
           </div>
           <LuxuryBtn type="submit" disabled={isLoading}>
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin"/> : <><span>Continue</span><ArrowRight className="w-4 h-4"/></>}
           </LuxuryBtn>
         </form>
 
-        <div className="relative flex items-center my-6">
+        <div className="relative flex items-center my-6 z-20">
           <div className="flex-1 h-px bg-[#0a0700]/10"/>
           <span className="mx-4 text-[9px] font-sans font-bold text-[#0a0700]/40 tracking-widest uppercase">or</span>
           <div className="flex-1 h-px bg-[#0a0700]/10"/>
         </div>
 
         <button type="button" disabled={isLoading} onClick={handleGoogle}
-          className="w-full h-11 rounded-xl font-sans font-semibold text-[13px] text-[#0a0700] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-black/[0.05] flex items-center justify-center gap-3 hover:bg-neutral-50 transition-colors"
+          className="relative z-20 w-full h-11 rounded-xl font-sans font-semibold text-[13px] text-[#0a0700] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-black/[0.05] flex items-center justify-center gap-3 hover:bg-neutral-50 transition-colors"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.355 0 3.39 2.673 1.473 6.564l3.793 3.201z"/>
@@ -250,26 +253,26 @@ function BusinessSignInContent() {
           Continue with Google
         </button>
       </div>
-      <div className="mt-8 text-center">
+      <div className="mt-8 text-center z-20 relative">
         <p className="text-[12px] font-sans text-[#0a0700]/70 font-medium">
-          New to Sparkle? <Link href="/auth/business/signup" className="text-[#0a0700] font-bold hover:underline">Apply for an account</Link>
+          New to Sparkle? <Link href="/auth/business/signup" className="text-[#0a0700] font-bold hover:underline relative z-20">Apply for an account</Link>
         </p>
       </div>
     </div>
   );
 
   const BackContent = (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex-1 flex flex-col h-full z-20 relative">
       <TopHeader />
       <div className="flex-1 flex flex-col justify-center">
         <AnimatePresence mode="wait">
           {phoneState === "idle" ? (
             <motion.div key="send" initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }} className="space-y-6">
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 relative z-20">
                 <label className="text-[10px] font-sans tracking-[0.15em] uppercase text-neutral-500 font-semibold pl-1">Mobile Number</label>
                 <div className="bg-black/[0.02] border border-black/[0.08] rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.01)_inset] focus-within:bg-white/50 focus-within:border-[#0a0700]/20 transition-all">
                   <PhoneInput value={phoneValue} onChange={(v) => setPhoneValue(v??"")} placeholder="Enter phone number"
-                    className="bg-transparent border-none text-[#0a0700] px-4 py-3.5 text-[15px] font-sans outline-none w-full placeholder:text-neutral-400" />
+                    className="bg-transparent border-none text-[#0a0700] px-4 py-3.5 text-[15px] font-sans outline-none w-full placeholder:text-neutral-400 relative z-20" />
                 </div>
               </div>
               <LuxuryBtn onClick={onPhoneSend} disabled={isLoading}>
@@ -278,33 +281,35 @@ function BusinessSignInContent() {
             </motion.div>
           ) : (
             <motion.div key="verify" initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }} className="space-y-6">
-              <div className="rounded-xl px-4 py-3.5 flex items-center justify-between bg-black/[0.03] border border-black/[0.06]">
+              <div className="rounded-xl px-4 py-3.5 flex items-center justify-between bg-black/[0.03] border border-black/[0.06] relative z-20">
                 <div>
                   <p className="text-[9px] text-[#0a0700]/50 font-sans uppercase tracking-widest mb-0.5 font-bold">Code sent to</p>
                   <p className="text-[13px] text-[#0a0700] font-sans font-bold tracking-wide">{phoneNumber}</p>
                 </div>
                 <Timer secs={otpTimer}/>
               </div>
-              <div>
+              <div className="relative z-20">
                 <label className="text-[10px] font-sans tracking-[0.15em] uppercase text-neutral-500 font-semibold pl-1 mb-2 block">
                   <ShieldCheck className="w-3.5 h-3.5 inline mr-1 -mt-0.5" style={{ color:ACCENT }}/> Enter OTP
                 </label>
-                <OTPInput value={otpValue} onChange={setOtpValue} accentColor="#0a0700" accentRgb="10,7,0" />
+                <div className="relative z-30">
+                  <OTPInput value={otpValue} onChange={setOtpValue} accentColor="#0a0700" accentRgb="10,7,0" />
+                </div>
               </div>
               <LuxuryBtn onClick={onOTPSubmit} disabled={isLoading||otpValue.length<6}>
                 {isLoading?<Loader2 className="w-4 h-4 animate-spin"/>:<><LogIn className="w-4 h-4"/><span>Verify & Sign In</span></>}
               </LuxuryBtn>
               <button type="button" onClick={() => { setPhoneState("idle"); setOtpValue(""); }}
-                className="w-full text-center text-xs font-semibold text-[#0a0700]/50 hover:text-[#0a0700] font-sans transition-colors flex items-center justify-center gap-1">
+                className="w-full text-center text-xs font-semibold text-[#0a0700]/50 hover:text-[#0a0700] font-sans transition-colors flex items-center justify-center gap-1 relative z-20">
                 <ArrowLeft className="w-3 h-3"/> Change number
               </button>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-      <div className="mt-8 text-center">
+      <div className="mt-8 text-center z-20 relative">
         <p className="text-[12px] font-sans text-[#0a0700]/70 font-medium">
-          New to Sparkle? <Link href="/auth/business/signup" className="text-[#0a0700] font-bold hover:underline">Apply for an account</Link>
+          New to Sparkle? <Link href="/auth/business/signup" className="text-[#0a0700] font-bold hover:underline relative z-20">Apply for an account</Link>
         </p>
       </div>
     </div>
@@ -313,7 +318,12 @@ function BusinessSignInContent() {
   return (
     <div className="relative w-full min-h-screen flex items-center justify-center p-4 selection:bg-[#0a0700] selection:text-white">
       <AuroraBackground variant="gold" className="fixed" />
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}>
+      <motion.div 
+        className="w-full max-w-[440px] z-10"
+        initial={{ opacity: 0, scale: 0.95 }} 
+        animate={{ opacity: 1, scale: 1 }} 
+        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+      >
         <FlipCard
           isFlipped={isFlipped}
           frontContent={FrontContent}

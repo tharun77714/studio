@@ -21,8 +21,8 @@ import { AuroraBackground } from "@/components/auth/visuals/AuroraBackground";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const ACCENT = "hsl(262 83% 58%)"; // Rich violet
-const ACCENT_RGB = "139,92,246";
+const ACCENT = "hsl(43 74% 66%)"; // Champagne Gold
+const ACCENT_RGB = "212,175,55";
 
 const DynamicAddressAutocompleteInput = dynamic(
   () => import("@/components/common/address-autocomplete-input").then((m) => m.AddressAutocompleteInput),
@@ -217,7 +217,7 @@ export default function IndividualSignUpPage() {
   return (
     <div className="relative w-full min-h-screen flex items-center justify-center p-4 selection:bg-[#0a0700] selection:text-white">
       {/* Full-screen aurora */}
-      <AuroraBackground variant="violet" className="fixed" />
+      <AuroraBackground variant="gold" className="fixed" />
 
       {/* Cinematic Diagonal Card Shell */}
       <motion.div
