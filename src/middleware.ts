@@ -15,9 +15,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
     pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/) ||
-    pathname.startsWith('/auth/individual/signin') ||
-    pathname.startsWith('/auth/individual/signup') ||
-    pathname.startsWith('/auth/business/signup') ||
+    pathname.startsWith('/auth/individual') ||
+    pathname.startsWith('/auth/business') ||
     pathname.startsWith('/api/auth')
   ) {
     // Allow access to onboarding page if they are authenticated, logic handled below
@@ -50,7 +49,7 @@ export async function middleware(request: NextRequest) {
   // 1. If not authenticated and trying to access protected route, redirect to signin
   if (!isAuthenticated) {
     if (isProtectedRoute || isOnboardingRoute) {
-      const signInUrl = new URL('/auth/individual/signin', request.url);
+      const signInUrl = new URL('/auth/individual', request.url);
       signInUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(signInUrl);
     }

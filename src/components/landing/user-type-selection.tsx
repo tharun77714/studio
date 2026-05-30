@@ -31,7 +31,7 @@ export function UserTypeSelection() {
             style={{ '--accent-foreground': 'hsl(var(--accent-foreground))', backgroundColor: 'hsl(var(--accent))' } as React.CSSProperties}
             asChild
           >
-            <Link href="/auth/individual/signin"> 
+            <Link href="/auth/individual"> 
               <AnimatedSparkleIcon className="mr-2 h-5 w-5" /> Explore as Individual
             </Link>
           </Button>
@@ -55,7 +55,7 @@ export function UserTypeSelection() {
             variant="default"
             asChild
           >
-             <Link href="/auth/business/signin"> 
+             <Link href="/auth/business"> 
                <AnimatedSparkleIcon className="mr-2 h-5 w-5" /> Join as Business
              </Link>
           </Button>
