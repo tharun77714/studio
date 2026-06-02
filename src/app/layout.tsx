@@ -1,5 +1,5 @@
 
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -9,24 +9,11 @@ import { SmoothScrollProvider } from '@/components/common/smooth-scroll-provider
 import { CursorGlow } from '@/components/common/CursorGlow';
 import { MoltenGoldLoader } from '@/components/ui/molten-gold-loader';
 
-export const viewport: Viewport = {
-  themeColor: "#0a0700",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-};
-
 export const metadata: Metadata = {
   title: 'Sparkle Studio',
   description: 'Discover your next favorite jewelry piece or showcase your collection.',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Sparkle",
-  },
   icons: {
-    icon: '/favicon.ico',
-    apple: '/favicon.ico',
+    icon: '/favicon.ico', // Assuming a favicon might be added later
   },
 };
 
