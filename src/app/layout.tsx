@@ -1,5 +1,6 @@
 
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/contexts/AuthContext'; // Import AuthProvider
@@ -24,6 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1519210527641884"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
