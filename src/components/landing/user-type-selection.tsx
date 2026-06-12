@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Users, Briefcase } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +8,6 @@ import { AnimatedSparkleIcon } from '@/components/common/animated-sparkle-icon';
 import Link from 'next/link';
 
 export function UserTypeSelection() {
-  const router = useRouter();
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
       <Card className="shadow-xl hover:shadow-2xl transition-shadow duration-300 bg-card/80 backdrop-blur-sm">

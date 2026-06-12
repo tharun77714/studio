@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import { useCinematicSequence } from './hooks/useCinematicSequence'
 import { useIntroLift } from './hooks/useIntroLift'
+import { ScrollToExploreArrow } from './ScrollToExploreArrow'
 import { SvgDrawSparkle } from './SvgDrawSparkle'
 import styles from './CinematicScrollHero.module.css'
 
@@ -67,6 +68,8 @@ export function CinematicScrollHero() {
           <span className={styles.hudText}>Could not load sequence</span>
         </div>
       )}
+
+      <ScrollToExploreArrow />
     </section>
   )
 }

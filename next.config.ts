@@ -1,10 +1,14 @@
 
-import type {NextConfig} from 'next';
+import path from 'path'
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
+  },
+  turbopack: {
+    root: path.join(__dirname),
   },
   images: {
     remotePatterns: [
@@ -25,4 +29,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default nextConfig

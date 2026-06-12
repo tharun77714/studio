@@ -61,32 +61,11 @@ export function AICustomizationSection() {
             <article className={styles.card} aria-labelledby="ar-tryon-heading">
               <div className={styles.cardInner}>
                 <div className={styles.iconWrap} aria-hidden>
-                  <div className={styles.iconOrb} />
-                  <svg
-                    className={styles.icon}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M8 10.5c2.2-3.2 5.8-3.2 8 0"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M4.5 12c3.8-6 11.2-6 15 0"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M10.2 13.3a2.2 2.2 0 1 0 3.6 0"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <img
+                    src="/ar-try-on.webp"
+                    alt=""
+                    className={styles.arImage}
+                  />
                 </div>
                 <div className={styles.text}>
                   <h2 id="ar-tryon-heading" className={styles.headingSmall}>

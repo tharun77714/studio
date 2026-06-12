@@ -1,0 +1,64 @@
+.cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.25rem, 4vh, 2.25rem);
+  z-index: 6;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 215, 0, 0.92);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    0 0 24px rgba(212, 175, 55, 0.12);
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+  animation: cueFloat 2.8s ease-in-out infinite;
+}
+
+.cue:hover {
+  transform: translateX(-50%) translateY(-2px);
+  border-color: rgba(255, 215, 0, 0.55);
+  background: rgba(12, 12, 12, 0.72);
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(212, 175, 55, 0.2);
+}
+
+.cue:focus-visible {
+  outline: 2px solid rgba(255, 215, 0, 0.65);
+  outline-offset: 3px;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+@keyframes cueFloat {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cue {
+    animation: none;
+  }
+}
