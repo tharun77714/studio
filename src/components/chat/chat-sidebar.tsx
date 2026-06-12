@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import EmojiPicker, { Theme } from 'emoji-picker-react';
+import { GiphyFetch } from '@giphy/js-fetch-api';
+import { Grid } from '@giphy/react-components';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, Send, XCircle, UploadCloud, ChevronLeft, Sparkles, Mic, MicOff, CheckCheck } from 'lucide-react';
+import { MessageSquare, Send, XCircle, UploadCloud, ChevronLeft, Sparkles, Mic, MicOff, CheckCheck, Smile, ImagePlay } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+
+const gf = new GiphyFetch(process.env.NEXT_PUBLIC_GIPHY_API_KEY || 'AZxhHd9xkMRbhIYn1c1YhmgIYH2qGHt4');
 
 export function ChatSidebar() {
   const {
@@ -26,6 +31,8 @@ export function ChatSidebar() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [draft, setDraft] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -319,9 +326,37 @@ export function ChatSidebar() {
 
             {/* Input Area */}
             <div className="p-4 bg-background/50 backdrop-blur-xl border-t border-white/10 shrink-0 relative z-10">
+              
+              {showEmojiPicker && (
+                <div className="absolute bottom-20 left-4 z-50 shadow-2xl rounded-lg overflow-hidden border border-white/10">
+                  <EmojiPicker 
+                    theme={Theme.DARK} 
+                    onEmojiClick={(emojiData) => {
+                      setDraft(prev => prev + emojiData.emoji);
+                    }}
+                  />
+                </div>
+              )}
+              
+              {showGifPicker && (
+                <div className="absolute bottom-20 left-4 z-50 bg-black/95 p-2 rounded-xl border border-white/10 shadow-2xl h-[350px] overflow-y-auto w-[calc(100%-2rem)] custom-scrollbar">
+                  <Grid 
+                    width={310} 
+                    columns={2} 
+                    fetchGifs={(offset) => gf.trending({ offset, limit: 10 })} 
+                    onGifClick={async (gif, e) => {
+                      e.preventDefault();
+                      setShowGifPicker(false);
+                      const success = await sendMessage(gif.images.original.url, 'image');
+                      if (success) setDraft('');
+                    }}
+                  />
+                </div>
+              )}
+
               <form 
                 onSubmit={handleSubmit}
-                className="flex items-center gap-2 rounded-full border border-border/50 bg-accent/30 p-1.5 shadow-inner backdrop-blur-md transition-all focus-within:ring-2 focus-within:ring-primary/50 focus-within:bg-accent/50"
+                className="flex items-center gap-1.5 rounded-full border border-border/50 bg-accent/30 p-1.5 shadow-inner backdrop-blur-md transition-all focus-within:ring-2 focus-within:ring-primary/50 focus-within:bg-accent/50"
               >
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                 
@@ -344,8 +379,26 @@ export function ChatSidebar() {
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Type your message..."
                   disabled={isSendingMessage}
-                  className="flex-1 border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-0 text-white placeholder:text-white/40"
+                  className="flex-1 border-0 bg-transparent px-1 text-sm shadow-none focus-visible:ring-0 text-white placeholder:text-white/40"
                 />
+
+                <button
+                  type="button"
+                  onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowGifPicker(false); }}
+                  className={cn("group flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition shadow-sm", showEmojiPicker ? "bg-primary/20 text-primary" : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white")}
+                  aria-label="Add emoji"
+                >
+                  <Smile className="h-4 w-4 transition-transform group-hover:scale-110" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setShowGifPicker(!showGifPicker); setShowEmojiPicker(false); }}
+                  className={cn("group flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition shadow-sm", showGifPicker ? "bg-primary/20 text-primary" : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white")}
+                  aria-label="Add GIF"
+                >
+                  <ImagePlay className="h-4 w-4 transition-transform group-hover:scale-110" />
+                </button>
                 
                 <button
                   type="button"
